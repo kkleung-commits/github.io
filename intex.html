@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>視覺注視訓練：泥膠變身 (豪華升級版)</title>
+    <style>
+        /* --- 全域樣式 --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff; 
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- 第一頁：設定畫面 --- */
+        #settings-page {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        h1 { color: #333; margin-bottom: 30px; }
+
+        .setting-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .adult-check {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border: 2px dashed #91d5ff;
+        }
+
+        .btn-start {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+        .btn-start:hover { background-color: #45a049; }
+
+        /* --- 第二頁：遊戲畫面 --- */
+        #game-page {
+            display: none; 
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #222; 
+        }
+
+        /* ✨ 回到主頁按鈕 */
+        #btn-home {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #ffffff;
+            color: #333;
+            border: 2px solid #ccc;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        #btn-home:hover {
+            background-color: #f0f0f0;
+            border-color: #999;
+            transform: scale(1.05);
+        }
+
+        .image-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            border: 4px dashed #777; 
+            border-radius: 20px;
+            transition: border-color 0.3s;
+            cursor: crosshair; 
+        }
+
+        .game-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 16px;
+            pointer-events: none; 
+            transition: opacity 0.1s linear;
+        }
+
+        #clay-img { z-index: 2; opacity: 1; transform-origin: center; } 
+        #figure-img { z-index: 1; opacity: 0; } 
+
+        /* ✨ 強化的泥膠動態效果 (果凍般擠壓與縮放) --- */
+        @keyframes gazeReactStrong {
+            0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+            20%  { transform: scale(1.15, 0.85) rotate(-5deg); opacity: 0.9; }
+            40%  { transform: scale(0.85, 1.15) rotate(5deg); opacity: 1; filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.9)); }
+            60%  { transform: scale(1.1, 0.9) rotate(-3deg); opacity: 0.9; }
+            80%  { transform: scale(0.95, 1.05) rotate(3deg); opacity: 1; filter: drop-shadow(0 0 15px rgba(76, 175, 80, 0.7)); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .game-img.is-gazing {
+            /* 動畫時間變短，感覺更活潑 */
+            animation: gazeReactStrong 0.6s ease-in-out infinite;
+        }
+
+        #instruction {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        #progress-bar-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 20px;
+            background-color: #555;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgm" src="./music.mp3" loop></audio>
+
+    <div id="settings-page">
+        <h1>⚙️ 眼動儀訓練設定</h1>
+        
+        <div class="setting-group">
+            <label>遊戲模式</label>
+            <select id="game-mode">
+                <option value="fixed">定點注視 (看著中間範圍)</option>
+                <option value="dynamic">動態注視 (需掃視整個圖片範圍)</option>
+            </select>
+        </div>
+
+        <div class="setting-group">
+            <label>完成變身所需總時間 (秒)</label>
+            <input type="number" id="total-time" value="5" min="1" max="60">
+        </div>
+
+        <div class="setting-group">
+            <label>觸發前注視停留時間 (秒)</label>
+            <input type="number" id="dwell-time" value="1" min="0" step="0.5">
+        </div>
+
+        <div class="adult-check">
+            <p><strong>請確認：</strong>已開啟眼動儀軟體的「游標跟隨視線」功能，並打開電腦喇叭。</p>
+            <button class="btn-start" onclick="startGame()">▶ 開始遊戲</button>
+        </div>
+    </div>
+
+    <div id="game-page">
+        <button id="btn-home" onclick="goHome()">🏠 回到設定</button>
+
+        <div id="instruction">請用眼睛注視中間的方框範圍</div>
+        
+        <div class="image-container" id="target-area">
+            <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Cpath d='M100 200 C80 100, 200 80, 280 120 C350 160, 320 280, 250 320 C180 350, 120 300, 100 200 Z' fill='%238B5A2B'/%3E%3C/svg%3E" id="clay-img" class="game-img" alt="泥膠起始圖">
+            
+            <img src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Ctext x='50%25' y='50%25' font-size='200' text-anchor='middle' dy='.35em'%3E🐰%3C/text%3E%3C/svg%3E" id="figure-img" class="game-img" alt="公仔">
+        </div>
+
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        const targetImages = [
+            "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Ctext x='50%25' y='50%25' font-size='200' text-anchor='middle' dy='.35em'%3E🐰%3C/text%3E%3C/svg%3E",
+            "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Ctext x='50%25' y='50%25' font-size='200' text-anchor='middle' dy='.35em'%3E🐶%3C/text%3E%3C/svg%3E",
+            "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Ctext x='50%25' y='50%25' font-size='200' text-anchor='middle' dy='.35em'%3E🐱%3C/text%3E%3C/svg%3E",
+            "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23ffffff' rx='20' ry='20'/%3E%3Ctext x='50%25' y='50%25' font-size='200' text-anchor='middle' dy='.35em'%3E🐻%3C/text%3E%3C/svg%3E"
+        ];
+
+        let currentImageIndex = 0; 
+        let gameMode, totalTime, dwellTime;
+        let isLooking = false;
+        let isCooldown = false; 
+        let gazeTimer = null; 
+        let transformInterval = null; 
+        let progress = 0; 
+
+        const settingsPage = document.getElementById('settings-page');
+        const gamePage = document.getElementById('game-page');
+        const targetArea = document.getElementById('target-area');
+        const clayImg = document.getElementById('clay-img');
+        const figureImg = document.getElementById('figure-img');
+        const progressBar = document.getElementById('progress-bar');
+        const instruction = document.getElementById('instruction');
+        const bgm = document.getElementById('bgm'); // 取得音樂元件
+
+        // --- 🎤 語音朗讀功能 ---
+        function speakText(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK'; 
+            utterance.rate = 0.9; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- ▶️ 點擊開始遊戲 ---
+        function startGame() {
+            gameMode = document.getElementById('game-mode').value;
+            totalTime = parseFloat(document.getElementById('total-time').value) * 1000; 
+            dwellTime = parseFloat(document.getElementById('dwell-time').value) * 1000;
+
+            settingsPage.style.display = 'none';
+            gamePage.style.display = 'block';
+
+            // 嘗試播放音樂 (如果找不到檔案會在後台報錯，但不會影響遊戲運行)
+            bgm.volume = 0.3; // 把背景音樂稍微調小，以免蓋過語音
+            bgm.play().catch(e => console.log("未偵測到 music.mp3 或瀏覽器阻擋自動播放"));
+
+            speakText("請用眼睛注視中間的方框範圍");
+        }
+
+        // --- 🏠 回到首頁功能 ---
+        function goHome() {
+            // 1. 停止所有計時器和動畫
+            clearTimeout(gazeTimer);
+            pauseTransformation();
+            isLooking = false;
+            isCooldown = false;
+            
+            // 2. 停止音樂和語音
+            window.speechSynthesis.cancel();
+            bgm.pause();
+            bgm.currentTime = 0; 
+
+            // 3. 重置畫面狀態
+            progress = 0;
+            currentImageIndex = 0;
+            figureImg.src = targetImages[0];
+            clayImg.style.opacity = 1;
+            figureImg.style.opacity = 0;
+            progressBar.style.width = "0%";
+            clayImg.classList.remove('is-gazing');
+            
+            instruction.innerText = "請用眼睛注視中間的方框範圍";
+            instruction.style.color = "white";
+            targetArea.style.borderColor = "#777";
+
+            // 4. 切換回設定頁
+            gamePage.style.display = 'none';
+            settingsPage.style.display = 'block';
+        }
+
+        // --- 視線進入 (眼動儀游標移入) ---
+        targetArea.addEventListener('mouseenter', () => {
+            isLooking = true;
+            if (isCooldown) return; 
+
+            instruction.innerText = "👀 很好！請保持注視...";
+            instruction.style.color = "#4CAF50";
+            targetArea.style.borderColor = "#4CAF50";
+            clayImg.classList.add('is-gazing');
+
+            speakText("很好！請保持注視");
+
+            gazeTimer = setTimeout(() => {
+                startTransformation();
+            }, dwellTime);
+        });
+
+        // --- 視線移動中 ---
+        targetArea.addEventListener('mousemove', () => {
+            if (!isLooking) isLooking = true;
+        });
+
+        // --- 視線移開 (眼動儀游標移出) ---
+        targetArea.addEventListener('mouseleave', () => {
+            isLooking = false;
+            if (isCooldown) return; 
+
+            instruction.innerText = "❌ 視線移開了，請看回圖片！";
+            instruction.style.color = "#f44336";
+            targetArea.style.borderColor = "#f44336";
+            clayImg.classList.remove('is-gazing');
+
+            speakText("視線移開了，請看回圖片！");
+
+            clearTimeout(gazeTimer); 
+            pauseTransformation();   
+        });
+
+        // --- 開始漸變效果 ---
+        function startTransformation() {
+            if (transformInterval || isCooldown) return; 
+
+            clayImg.classList.remove('is-gazing');
+            let step = (50 / totalTime) * 100;
+
+            transformInterval = setInterval(() => {
+                if(progress >= 100) {
+                    clearInterval(transformInterval);
+                    transformInterval = null;
+                    isCooldown = true; 
+
+                    instruction.innerText = "🎉 變身完成！太棒了！";
+                    instruction.style.color = "#FFD700";
+                    targetArea.style.borderColor = "#FFD700";
+                    speakText("變身完成！太棒了！");
+                    
+                    setTimeout(() => { resetGameForNextImage(); }, 3000);
+                    return;
+                }
+                
+                progress += step;
+                clayImg.style.opacity = 1 - (progress / 100);
+                figureImg.style.opacity = progress / 100;
+                progressBar.style.width = progress + "%";
+
+            }, 50);
+        }
+
+        // --- 暫停漸變效果 ---
+        function pauseTransformation() {
+            clearInterval(transformInterval);
+            transformInterval = null;
+        }
+
+        // --- ♻️ 重置遊戲並切換下一張圖片 ---
+        function resetGameForNextImage() {
+            currentImageIndex++;
+            if (currentImageIndex >= targetImages.length) currentImageIndex = 0; 
+            
+            figureImg.src = targetImages[currentImageIndex];
+            progress = 0;
+            clayImg.style.opacity = 1;
+            figureImg.style.opacity = 0;
+            progressBar.style.width = "0%";
+            
+            instruction.innerText = "準備好變出新東西了嗎？請注視方框";
+            instruction.style.color = "white";
+            targetArea.style.borderColor = "#777";
+            speakText("準備好變出新東西了嗎？請注視方框");
+
+            clayImg.classList.remove('is-gazing');
+            isCooldown = false;
+
+            if (isLooking) {
+                instruction.style.color = "#4CAF50";
+                targetArea.style.borderColor = "#4CAF50";
+                clayImg.classList.add('is-gazing'); 
+                gazeTimer = setTimeout(() => { startTransformation(); }, dwellTime);
+            }
+        }
+    </script>
+</body>
+</html>
