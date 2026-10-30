@@ -164,6 +164,33 @@
             font-weight: 800;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
+
+        .modal-backdrop[hidden] {
+            display: none;
+        }
+
+        .game-item[hidden] {
+            display: none !important;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+            background: rgba(0, 0, 0, 0.82);
+        }
+
+        .modal-panel {
+            width: min(680px, 100%);
+            max-height: 100%;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 </head>
 <body>
@@ -221,39 +248,39 @@
         </div>
 
         <!-- 7 個生活與教學開關物件 -->
-        <main class="relative z-10 flex-grow w-full h-[64%] grid grid-cols-12 grid-rows-2 gap-2 p-0.5">
+        <main id="object-grid" class="relative z-10 flex-grow w-full h-[64%] grid grid-rows-2 gap-2 p-0.5">
             
-            <div id="obj-faucet" class="gaze-target col-span-4 row-span-1 bg-slate-900/90 border-2 border-cyan-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-faucet" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-cyan-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-faucet"></div>
                 <div class="item-label" id="label-faucet">水龍頭：關咗</div>
             </div>
 
-            <div id="obj-light" class="gaze-target col-span-4 row-span-1 bg-slate-900/90 border-2 border-yellow-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-light" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-yellow-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-light"></div>
                 <div class="item-label" id="label-light">燈具：關咗</div>
             </div>
 
-            <div id="obj-speaker" class="gaze-target col-span-4 row-span-1 bg-slate-900/90 border-2 border-indigo-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-speaker" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-indigo-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-speaker"></div>
                 <div class="item-label" id="label-speaker">藍牙喇叭：關咗</div>
             </div>
 
-            <div id="obj-massage" class="gaze-target col-span-3 row-span-1 bg-slate-900/90 border-2 border-emerald-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-massage" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-emerald-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-massage"></div>
                 <div class="item-label" id="label-massage">按摩槍：關咗</div>
             </div>
 
-            <div id="obj-dryer" class="gaze-target col-span-3 row-span-1 bg-slate-900/90 border-2 border-rose-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-dryer" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-rose-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-dryer"></div>
                 <div class="item-label" id="label-dryer">風筒：關咗</div>
             </div>
 
-            <div id="obj-book" class="gaze-target col-span-3 row-span-1 bg-slate-900/90 border-2 border-amber-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-book" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-amber-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-book"></div>
                 <div class="item-label" id="label-book">發聲圖書：關咗</div>
             </div>
 
-            <div id="obj-mic" class="gaze-target col-span-3 row-span-1 bg-slate-900/90 border-2 border-purple-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
+            <div id="obj-mic" class="game-item gaze-target row-span-1 bg-slate-900/90 border-2 border-purple-500/50 rounded-2xl p-1.5 flex flex-col items-center justify-between relative shadow">
                 <div class="w-full h-[70%] flex items-center justify-center" id="svg-mic"></div>
                 <div class="item-label" id="label-mic">藍牙咪高峰：關咗</div>
             </div>
@@ -271,12 +298,68 @@
                 </button>
             </div>
 
-            <div id="score-stars" class="flex items-center gap-1.5 font-black text-amber-400 bg-amber-950/80 px-3 py-0.5 rounded-lg border border-amber-600 text-base md:text-lg">
-                <span>⭐ 答對：</span>
-                <span id="star-count" class="text-xl font-black">0</span>
+            <div class="flex items-center gap-1.5">
+                <button type="button" onclick="openTeacherSettings()" class="gaze-target btn-large bg-violet-700 text-white border border-violet-400">
+                    ⚙️ 老師設定
+                </button>
+                <button type="button" onclick="openLearningStats()" class="gaze-target btn-large bg-cyan-800 text-white border border-cyan-400">
+                    📊 學習統計
+                </button>
+                <div id="score-stars" class="flex items-center gap-1.5 font-black text-amber-400 bg-amber-950/80 px-3 py-0.5 rounded-lg border border-amber-600 text-base md:text-lg">
+                    <span>⭐ 答對：</span>
+                    <span id="star-count" class="text-xl font-black">0</span>
+                </div>
             </div>
         </footer>
 
+    </div>
+
+    <div id="teacher-modal" class="modal-backdrop" hidden>
+        <section class="modal-panel bg-slate-900 text-white rounded-2xl border-2 border-violet-400 p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="teacher-title">
+            <div class="flex justify-between items-center gap-3 mb-4">
+                <h2 id="teacher-title" class="text-2xl font-black text-violet-300">⚙️ 老師設定</h2>
+                <button type="button" onclick="closeModal('teacher-modal')" class="bg-slate-700 hover:bg-slate-600 rounded-lg px-4 py-2 font-bold" aria-label="關閉老師設定">關閉</button>
+            </div>
+            <p class="text-sm text-slate-300 mb-4">選擇學生可操作的物件及任務難度。設定只保存在這部裝置的瀏覽器。</p>
+            <fieldset class="mb-5">
+                <legend class="font-bold text-white mb-2">可用物件</legend>
+                <div id="teacher-items" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+            </fieldset>
+            <label for="difficulty-select" class="block font-bold mb-2">任務難度</label>
+            <select id="difficulty-select" class="w-full bg-slate-800 border border-slate-600 text-white rounded-lg p-3 text-lg mb-3">
+                <option value="easy">簡單：最多 3 個物件</option>
+                <option value="standard">標準：最多 5 個物件</option>
+                <option value="challenge">挑戰：使用全部已選物件</option>
+            </select>
+            <p id="teacher-status" class="text-sm text-amber-300 min-h-6 mb-3" role="status"></p>
+            <div class="flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="closeModal('teacher-modal')" class="bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-lg font-bold">取消</button>
+                <button type="button" onclick="saveTeacherSettings()" class="bg-violet-600 hover:bg-violet-500 px-5 py-3 rounded-lg font-black">儲存設定</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="stats-modal" class="modal-backdrop" hidden>
+        <section class="modal-panel bg-slate-900 text-white rounded-2xl border-2 border-cyan-400 p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="stats-title">
+            <div class="flex justify-between items-center gap-3 mb-4">
+                <h2 id="stats-title" class="text-2xl font-black text-cyan-300">📊 學習統計</h2>
+                <button type="button" onclick="closeModal('stats-modal')" class="bg-slate-700 hover:bg-slate-600 rounded-lg px-4 py-2 font-bold" aria-label="關閉學習統計">關閉</button>
+            </div>
+            <p class="text-sm text-slate-300 mb-4">統計只保存在本機瀏覽器，不會上傳。此版本不記錄學生姓名。</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">遊戲次數</div><div id="stats-sessions" class="text-2xl font-black text-white">0</div></div>
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">任務嘗試</div><div id="stats-attempts" class="text-2xl font-black text-white">0</div></div>
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">答對率</div><div id="stats-accuracy" class="text-2xl font-black text-emerald-300">0%</div></div>
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">答對嘗試</div><div id="stats-correct" class="text-2xl font-black text-emerald-300">0</div></div>
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">錯誤次數</div><div id="stats-errors" class="text-2xl font-black text-rose-300">0</div></div>
+                <div class="bg-slate-800 p-3 rounded-xl"><div class="text-sm text-slate-400">平均完成時間</div><div id="stats-response" class="text-2xl font-black text-sky-300">--</div></div>
+            </div>
+            <p id="stats-status" class="text-sm text-amber-300 min-h-6 mb-3" role="status"></p>
+            <div class="flex flex-wrap justify-end gap-2">
+                <button type="button" onclick="clearLearningStats()" class="bg-rose-700 hover:bg-rose-600 px-4 py-3 rounded-lg font-bold">清除統計</button>
+                <button type="button" onclick="exportLearningStats()" class="bg-cyan-700 hover:bg-cyan-600 px-4 py-3 rounded-lg font-bold">匯出 CSV</button>
+            </div>
+        </section>
     </div>
 
     <!-- 邏輯與廣東話 TTS 語音 / 全教具 Web Audio 合成音效引擎 -->
@@ -359,6 +442,68 @@
 
         let audioCtx = null;
         let cantoneseVoice = null;
+        const SETTINGS_STORAGE_KEY = 'classroom-toggle-settings-v1';
+        const STATS_STORAGE_KEY = 'classroom-toggle-stats-v1';
+        const defaultTeacherSettings = {
+            enabledItemIds: Object.keys(classroomItems),
+            difficulty: 'standard'
+        };
+        const defaultLearningStats = {
+            sessions: 0,
+            correctAttempts: 0,
+            incorrectAttempts: 0,
+            completedTasks: 0,
+            totalResponseMs: 0
+        };
+        let teacherSettings = { ...defaultTeacherSettings, enabledItemIds: [...defaultTeacherSettings.enabledItemIds] };
+        let learningStats = { ...defaultLearningStats };
+        let activeTaskStartedAt = 0;
+        let nextTaskTimeoutId = null;
+        let hasStartedSession = false;
+        let storageIssue = '';
+
+        function readLocalData(key, fallback, isValid) {
+            try {
+                const rawValue = localStorage.getItem(key);
+                if (!rawValue) return fallback;
+                const parsedValue = JSON.parse(rawValue);
+                if (!isValid(parsedValue)) {
+                    storageIssue = '本機保存資料格式無效，已載入預設設定。';
+                    console.warn(`Invalid local storage data for ${key}; defaults were loaded.`);
+                    return fallback;
+                }
+                return parsedValue;
+            } catch (error) {
+                storageIssue = '無法讀取本機儲存資料，設定或統計可能無法保留。';
+                console.warn('Local storage read failed:', error);
+                return fallback;
+            }
+        }
+
+        function writeLocalData(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (error) {
+                storageIssue = '無法寫入本機儲存資料；資料只暫存於目前頁面。';
+                console.error('Local storage write failed:', error);
+                return false;
+            }
+        }
+
+        function loadSavedData() {
+            const validSettings = (value) => value
+                && Array.isArray(value.enabledItemIds)
+                && value.enabledItemIds.length > 0
+                && value.enabledItemIds.every((id) => Object.prototype.hasOwnProperty.call(classroomItems, id))
+                && ['easy', 'standard', 'challenge'].includes(value.difficulty);
+            const validStats = (value) => value
+                && ['sessions', 'correctAttempts', 'incorrectAttempts', 'completedTasks', 'totalResponseMs']
+                    .every((key) => Number.isFinite(value[key]) && value[key] >= 0);
+
+            teacherSettings = readLocalData(SETTINGS_STORAGE_KEY, teacherSettings, validSettings);
+            learningStats = readLocalData(STATS_STORAGE_KEY, learningStats, validStats);
+        }
 
         function initCantoneseVoice() {
             if (!('speechSynthesis' in window)) return;
@@ -384,6 +529,11 @@
             }
 
             initCantoneseVoice();
+            if (!hasStartedSession) {
+                hasStartedSession = true;
+                learningStats.sessions++;
+                writeLocalData(STATS_STORAGE_KEY, learningStats);
+            }
 
             document.getElementById('start-overlay').style.display = 'none';
             speakText("歡迎嚟到開關同聲音探索課室！請點擊或者用眼睛睇住物品！");
@@ -734,6 +884,7 @@
 
         function toggleItemState(key) {
             const item = classroomItems[key];
+            if (!teacherSettings.enabledItemIds.includes(key)) return;
             item.isOpen = !item.isOpen;
             renderClassroomItem(key);
 
@@ -753,8 +904,14 @@
 
             const clickedItem = classroomItems[clickedKey];
             const requiredIsOpen = targetTask.requiredState === 'open';
+            const isCorrect = clickedKey === targetTask.itemId && clickedItem.isOpen === requiredIsOpen;
+            const elapsedMs = Math.max(0, Date.now() - activeTaskStartedAt);
 
-            if (clickedKey === targetTask.itemId && clickedItem.isOpen === requiredIsOpen) {
+            if (isCorrect) {
+                learningStats.correctAttempts++;
+                learningStats.completedTasks++;
+                learningStats.totalResponseMs += elapsedMs;
+                writeLocalData(STATS_STORAGE_KEY, learningStats);
                 scoreStars++;
                 document.getElementById('star-count').innerText = scoreStars;
 
@@ -762,16 +919,30 @@
                 document.getElementById('instruction-text').innerHTML = `🎉 答對喇！你成功將 <span class="text-emerald-400 font-extrabold">${clickedItem.name}</span> ${stateHK}！`;
                 speakText(`太棒喇！你成功將${clickedItem.name}${stateHK}！`);
 
-                setTimeout(() => {
-                    generateNextTask();
+                clearTimeout(nextTaskTimeoutId);
+                nextTaskTimeoutId = setTimeout(() => {
+                    nextTaskTimeoutId = null;
+                    if (gameMode === 'task') generateNextTask();
                 }, 2200);
             } else {
+                learningStats.incorrectAttempts++;
+                writeLocalData(STATS_STORAGE_KEY, learningStats);
                 speakText("再試吓睇睇，搵啱目標同開關狀態！");
             }
         }
 
         function generateNextTask() {
-            const keys = Object.keys(classroomItems);
+            const maxItemsByDifficulty = {
+                easy: 3,
+                standard: 5,
+                challenge: teacherSettings.enabledItemIds.length
+            };
+            const keys = teacherSettings.enabledItemIds.slice(0, maxItemsByDifficulty[teacherSettings.difficulty]);
+            if (keys.length === 0) {
+                targetTask = null;
+                document.getElementById('instruction-text').innerText = '請先在老師設定中選擇至少一個物件。';
+                return;
+            }
             const randomKey = keys[Math.floor(Math.random() * keys.length)];
             const targetItem = classroomItems[randomKey];
             const targetState = targetItem.isOpen ? 'close' : 'open';
@@ -781,12 +952,18 @@
                 itemId: randomKey,
                 requiredState: targetState
             };
+            activeTaskStartedAt = Date.now();
 
             document.getElementById('instruction-text').innerHTML = `🎯 任務：請幫手<span class="text-amber-300 font-extrabold">${actionHK}</span> <span class="text-sky-300 font-extrabold">${targetItem.name}</span>！`;
             speakText(`任務：請幫手${actionHK}${targetItem.name}！`);
         }
 
         function setGameMode(mode) {
+            if (mode !== 'task') {
+                clearTimeout(nextTaskTimeoutId);
+                nextTaskTimeoutId = null;
+                targetTask = null;
+            }
             gameMode = mode;
             const btnExplore = document.getElementById('mode-explore');
             const btnTask = document.getElementById('mode-task');
@@ -818,6 +995,8 @@
         }
 
         function resetClassroom() {
+            clearTimeout(nextTaskTimeoutId);
+            nextTaskTimeoutId = null;
             Object.keys(classroomItems).forEach(key => {
                 classroomItems[key].isOpen = false;
                 renderClassroomItem(key);
@@ -832,13 +1011,144 @@
             }
         }
 
+        function applyTeacherSettings() {
+            const grid = document.getElementById('object-grid');
+            const itemCount = teacherSettings.enabledItemIds.length;
+            const columns = itemCount <= 2 ? itemCount : itemCount <= 4 ? 2 : itemCount <= 6 ? 3 : 4;
+            grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+            grid.style.gridTemplateRows = itemCount <= columns
+                ? 'minmax(0, 1fr)'
+                : 'repeat(2, minmax(0, 1fr))';
+            Object.keys(classroomItems).forEach((key) => {
+                const card = document.getElementById(`obj-${key}`);
+                card.hidden = !teacherSettings.enabledItemIds.includes(key);
+            });
+        }
+
+        function openTeacherSettings() {
+            const itemsContainer = document.getElementById('teacher-items');
+            itemsContainer.innerHTML = Object.keys(classroomItems).map((key) => {
+                const item = classroomItems[key];
+                const checked = teacherSettings.enabledItemIds.includes(key) ? 'checked' : '';
+                return `<label class="flex items-center gap-2 bg-slate-800 p-3 rounded-lg text-sm font-bold">
+                    <input type="checkbox" value="${key}" ${checked} class="w-5 h-5 accent-violet-500">
+                    <span>${item.name}</span>
+                </label>`;
+            }).join('');
+            document.getElementById('difficulty-select').value = teacherSettings.difficulty;
+            document.getElementById('teacher-status').innerText = storageIssue;
+            document.getElementById('teacher-modal').hidden = false;
+        }
+
+        function saveTeacherSettings() {
+            const selectedIds = Array.from(document.querySelectorAll('#teacher-items input:checked'), (input) => input.value);
+            const status = document.getElementById('teacher-status');
+            if (selectedIds.length === 0) {
+                status.innerText = '請至少選擇一個可用物件。';
+                return;
+            }
+
+            const nextSettings = {
+                enabledItemIds: selectedIds,
+                difficulty: document.getElementById('difficulty-select').value
+            };
+            teacherSettings = nextSettings;
+            applyTeacherSettings();
+            const saved = writeLocalData(SETTINGS_STORAGE_KEY, teacherSettings);
+            if (!saved) {
+                status.innerText = storageIssue;
+                return;
+            }
+
+            status.innerText = '設定已儲存於這部裝置。';
+            if (gameMode === 'task') generateNextTask();
+            setTimeout(() => closeModal('teacher-modal'), 500);
+        }
+
+        function openLearningStats() {
+            const attempts = learningStats.correctAttempts + learningStats.incorrectAttempts;
+            const accuracy = attempts ? Math.round((learningStats.correctAttempts / attempts) * 100) : 0;
+            const averageResponseMs = learningStats.completedTasks
+                ? learningStats.totalResponseMs / learningStats.completedTasks
+                : null;
+            document.getElementById('stats-sessions').innerText = learningStats.sessions;
+            document.getElementById('stats-attempts').innerText = attempts;
+            document.getElementById('stats-accuracy').innerText = `${accuracy}%`;
+            document.getElementById('stats-correct').innerText = learningStats.correctAttempts;
+            document.getElementById('stats-errors').innerText = learningStats.incorrectAttempts;
+            document.getElementById('stats-response').innerText = averageResponseMs === null
+                ? '--'
+                : `${(averageResponseMs / 1000).toFixed(1)} 秒`;
+            document.getElementById('stats-status').innerText = storageIssue;
+            document.getElementById('stats-modal').hidden = false;
+        }
+
+        function exportLearningStats() {
+            const attempts = learningStats.correctAttempts + learningStats.incorrectAttempts;
+            const averageResponseMs = learningStats.completedTasks
+                ? Math.round(learningStats.totalResponseMs / learningStats.completedTasks)
+                : '';
+            const csvRows = [
+                ['項目', '數值'],
+                ['匯出時間', new Date().toLocaleString('zh-HK')],
+                ['遊戲次數', learningStats.sessions],
+                ['任務嘗試', attempts],
+                ['答對次數', learningStats.correctAttempts],
+                ['錯誤次數', learningStats.incorrectAttempts],
+                ['答對率', `${attempts ? Math.round((learningStats.correctAttempts / attempts) * 100) : 0}%`],
+                ['完成任務數', learningStats.completedTasks],
+                ['平均完成時間（毫秒）', averageResponseMs]
+            ];
+            const csvContent = `\uFEFF${csvRows.map(row => row.map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')).join('\r\n')}`;
+            try {
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+                const downloadUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `classroom-learning-stats-${new Date().toISOString().slice(0, 10)}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+                document.getElementById('stats-status').innerText = 'CSV 統計檔已匯出。';
+            } catch (error) {
+                console.error('CSV export failed:', error);
+                document.getElementById('stats-status').innerText = '匯出失敗，請檢查瀏覽器下載設定。';
+            }
+        }
+
+        function clearLearningStats() {
+            if (!window.confirm('確定要清除這部裝置上保存的所有學習統計嗎？此操作不能復原。')) return;
+            try {
+                localStorage.removeItem(STATS_STORAGE_KEY);
+                learningStats = { ...defaultLearningStats };
+                openLearningStats();
+                document.getElementById('stats-status').innerText = '統計紀錄已清除。';
+            } catch (error) {
+                console.error('Clearing learning stats failed:', error);
+                document.getElementById('stats-status').innerText = '無法清除本機統計資料。';
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).hidden = true;
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
+            applyTeacherSettings();
             Object.keys(classroomItems).forEach(key => {
                 const el = document.getElementById(`obj-${key}`);
                 if (el) {
                     el.insertAdjacentHTML('beforeend', createDwellRingHTML());
                     attachGazeListeners(el, () => toggleItemState(key));
                     renderClassroomItem(key);
+                }
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeModal('teacher-modal');
+                    closeModal('stats-modal');
                 }
             });
         });
