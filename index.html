@@ -705,7 +705,6 @@
             element.addEventListener('pointerdown', (event) => {
                 if (event.pointerType === 'touch' || event.pointerType === 'pen') {
                     cancelDwell();
-                    triggerCallback(event);
                 }
             });
             element.addEventListener('touchstart', startDwell, { passive: true });

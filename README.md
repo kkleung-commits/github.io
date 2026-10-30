@@ -21,10 +21,12 @@
 
 ## 啟動方式
 
-1. 直接用瀏覽器開啟 `bbc` 檔案。
-2. 點擊「點擊開始遊戲」。
+1. 開啟網站首頁 `index.html`，或直接前往 GitHub Pages 網址。
+2. 點擊「點擊開始遊戲」以啟用音效及語音。
 3. 可選擇自由探索或任務挑戰模式。
 4. 使用觸控或模擬眼動停留來操作物品。
+
+原有的巴士到站頁面已保留為 `bus.html`。
 
 ## 版本狀態
 
@@ -54,6 +56,7 @@
 ## GitHub
 
 - Repository: https://github.com/kkleung-commits/github.io
+- GitHub Pages: https://kkleung-commits.github.io/github.io/
 - Branch: master
 - Tag: v0.1.0-ipad
 
