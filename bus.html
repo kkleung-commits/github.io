@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>心光恩望學校 - 智能交通助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 p-2 sm:p-4 min-h-screen">
+
+  <div class="max-w-3xl mx-auto space-y-3">
+    
+    <!-- 頂部標題與狀態欄 -->
+    <header class="bg-blue-900 text-white p-3.5 rounded-xl shadow-sm flex justify-between items-center">
+      <div>
+        <h1 class="text-base sm:text-lg font-bold flex items-center gap-2">
+          <i class="fa-solid fa-bus text-amber-400"></i> 心光學校 巴士到站預報
+        </h1>
+        <p class="text-[11px] text-blue-200 mt-0.5">薄扶林道站點 · 實時 API 數據</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="update-timer" class="text-[11px] text-blue-200 hidden sm:inline">30s 自動刷新</span>
+        <button onclick="fetchLiveETA()" class="bg-blue-700 hover:bg-blue-600 active:scale-95 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+          <i id="refresh-icon" class="fa-solid fa-rotate-right"></i> 刷新
+        </button>
+      </div>
+    </header>
+
+    <!-- 篩選控制面板 -->
+    <section class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 space-y-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        
+        <!-- 下拉選擇指定路線 -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">選擇巴士號碼</label>
+          <select id="route-select" onchange="applyFilter()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-bold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="ALL">🔍 所有行經心光學校路線</option>
+            <optgroup label="⭐ 熱門過海/主線">
+              <option value="970X">970X - 往 長沙灣 / 香港仔</option>
+              <option value="970">970 - 往 蘇屋 / 數碼港</option>
+              <option value="4">4 / 4X - 往 中環 / 華富</option>
+              <option value="30X">30X - 往 金鐘 / 數碼港</option>
+            </optgroup>
+            <optgroup label="🚌 城巴其他路線">
+              <option value="7">7 - 往 中環碼頭 / 石排灣</option>
+              <option value="37A">37A / 37B - 置富花園循環線</option>
+              <option value="40">40 / 40M - 往 會展站 / 華富</option>
+              <option value="71">71 - 往 中環 / 黃竹坑</option>
+              <option value="90B">90B - 往 金鐘 / 海怡半島</option>
+              <option value="91">91 - 往 中環碼頭 / 鴨脷洲</option>
+              <option value="973">973 - 往 尖沙咀 / 赤柱</option>
+              <option value="A10">A10 - 往 機場 / 鴨脷洲</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- 方向選擇 -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">行駛方向</label>
+          <select id="bound-select" onchange="applyFilter()" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm font-semibold rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <option value="ALL">↔️ 雙向（北行 + 南行）</option>
+            <option value="NORTH">⬆️ 北行（往 香港大學/堅尼地城/中環/九龍）</option>
+            <option value="SOUTH">⬇️ 南行（往 瑪麗醫院/置富/華富/香港仔）</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- 快捷切換按鈕 -->
+      <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-100">
+        <span class="text-[11px] text-slate-400 self-center mr-1">快捷切換:</span>
+        <button onclick="quickSelect('ALL')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-xs rounded-md font-semibold text-slate-700">全部</button>
+        <button onclick="quickSelect('970X')" class="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-xs rounded-md font-bold text-blue-900">970X</button>
+        <button onclick="quickSelect('970')" class="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-xs rounded-md font-bold text-blue-900">970</button>
+        <button onclick="quickSelect('4')" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-xs rounded-md font-bold text-amber-900">4 / 4X</button>
+        <button onclick="quickSelect('30X')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-xs rounded-md font-semibold text-slate-700">30X</button>
+        <button onclick="quickSelect('7')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-xs rounded-md font-semibold text-slate-700">7</button>
+      </div>
+    </section>
+
+    <!-- 到站預報卡片列表 -->
+    <main class="space-y-2">
+      <div class="flex justify-between items-center px-1">
+        <span id="status-tag" class="text-xs text-slate-500 font-medium">載入數據中...</span>
+        <span id="last-update" class="text-[11px] text-slate-400">最後更新: --:--:--</span>
+      </div>
+
+      <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <!-- 卡片會由 JS 動態生成 -->
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // 薄扶林道心光學校 Stop ID (城巴數據庫)
+    const STOPS = {
+      NORTH: "002410", // 心光學校 (北行往中環/九龍)
+      SOUTH: "002411"  // 心光學校 (南行往華富/香港仔)
+    };
+
+    const ROUTE_GROUPS = {
+      "4": ["4", "4X"],
+      "37A": ["37A", "37B"],
+      "40": ["40", "40M"]
+    };
+
+    let rawEtaData = [];
+
+    async function fetchStopETA(bound, stopId) {
+      const response = await fetch(`https://rt.data.gov.hk/v2/bus/stop-eta/ctb/${stopId}`);
+      if (!response.ok) {
+        throw new Error(`${bound} API 回傳 HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error(`${bound} API 回傳格式無效`);
+      }
+
+      return result.data.map(item => ({ ...item, bound }));
+    }
+
+    async function fetchLiveETA() {
+      const refreshIcon = document.getElementById("refresh-icon");
+      refreshIcon.classList.add("fa-spin");
+      document.getElementById("status-tag").innerText = "正在連線政府開放數據 API...";
+
+      try {
+        const [northResult, southResult] = await Promise.allSettled([
+          fetchStopETA("NORTH", STOPS.NORTH),
+          fetchStopETA("SOUTH", STOPS.SOUTH)
+        ]);
+
+        rawEtaData = [
+          ...(northResult.status === "fulfilled" ? northResult.value : []),
+          ...(southResult.status === "fulfilled" ? southResult.value : [])
+        ];
+
+        const failures = [];
+        if (northResult.status === "rejected") {
+          console.error("北行 API 連線失敗:", northResult.reason);
+          failures.push("北行");
+        }
+        if (southResult.status === "rejected") {
+          console.error("南行 API 連線失敗:", southResult.reason);
+          failures.push("南行");
+        }
+
+        if (rawEtaData.length > 0) {
+          const now = new Date();
+          document.getElementById("last-update").innerText = `最後更新: ${now.toTimeString().split(' ')[0]}`;
+        }
+        applyFilter();
+
+        if (failures.length === 2) {
+          document.getElementById("status-tag").innerText = "⚠️ 北行及南行數據擷取失敗，請檢查網絡連線";
+        } else if (failures.length > 0) {
+          document.getElementById("status-tag").innerText += `（${failures.join("、")}數據載入失敗）`;
+        }
+      } catch (error) {
+        console.error("API 連線失敗:", error);
+        document.getElementById("status-tag").innerText = "⚠️ 數據擷取失敗，請檢查網絡連線";
+      } finally {
+        refreshIcon.classList.remove("fa-spin");
+      }
+    }
+
+    function applyFilter() {
+      const selectedRoute = document.getElementById("route-select").value;
+      const selectedBound = document.getElementById("bound-select").value;
+      const container = document.getElementById("cards-container");
+      
+      container.innerHTML = "";
+
+      // 整理路線數據（按路線與方向分組）
+      const grouped = {};
+
+      rawEtaData.forEach(item => {
+        if (!item.eta) return;
+
+        const route = item.route;
+        const bound = item.bound;
+
+        if (selectedRoute !== "ALL" && !(ROUTE_GROUPS[selectedRoute] || [selectedRoute]).includes(route)) return;
+        if (selectedBound !== "ALL" && bound !== selectedBound) return;
+
+        const etaTime = new Date(item.eta);
+        if (!Number.isFinite(etaTime.getTime())) return;
+
+        const key = `${route}_${bound}_${item.dest_tc}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            route: route,
+            bound: bound,
+            dest: item.dest_tc || item.dest_en,
+            etas: []
+          };
+        }
+
+        const diffMins = Math.max(0, Math.round((etaTime - new Date()) / 60000));
+        grouped[key].etas.push(diffMins);
+      });
+
+      const keys = Object.keys(grouped);
+      document.getElementById("status-tag").innerText = `找到 ${keys.length} 組對應路線資訊`;
+
+      if (keys.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-400">
+            <i class="fa-solid fa-bus-simple text-3xl mb-2 text-slate-300"></i>
+            <p class="text-sm font-semibold">暫無相關路線之即時班次資料</p>
+          </div>
+        `;
+        return;
+      }
+
+      Object.values(grouped).forEach(group => group.etas.sort((a, b) => a - b));
+      keys.sort((a, b) => grouped[a].etas[0] - grouped[b].etas[0]);
+
+      keys.forEach(key => {
+        const group = grouped[key];
+
+        const firstEta = group.etas[0];
+        const nextEtas = group.etas.slice(1, 3).map(m => `${m} 分鐘`).join(' / ') || "無後續班次";
+
+        const isNorth = group.bound === "NORTH";
+
+        const badgeClass = firstEta <= 3 
+          ? "bg-red-500 text-white animate-pulse" 
+          : (firstEta <= 7 ? "bg-amber-500 text-white" : "bg-blue-600 text-white");
+
+        const card = document.createElement("div");
+        card.className = "bg-white p-3.5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between";
+        const content = document.createElement("div");
+        const heading = document.createElement("div");
+        heading.className = "flex justify-between items-center mb-1.5";
+        const routeInfo = document.createElement("div");
+        routeInfo.className = "flex items-center gap-2";
+        const routeLabel = document.createElement("span");
+        routeLabel.className = "text-2xl font-black text-slate-900 tracking-tight";
+        routeLabel.textContent = group.route;
+        const boundLabel = document.createElement("span");
+        boundLabel.className = `text-[11px] font-bold ${isNorth ? "text-blue-700" : "text-emerald-700"}`;
+        const boundIcon = document.createElement("i");
+        boundIcon.className = `fa-solid ${isNorth ? "fa-arrow-up" : "fa-arrow-down"} text-xs`;
+        boundLabel.append(boundIcon, document.createTextNode(isNorth ? " 北行" : " 南行"));
+        routeInfo.append(routeLabel, boundLabel);
+
+        const etaBadge = document.createElement("span");
+        etaBadge.className = `text-[10px] font-extrabold px-2 py-0.5 rounded ${badgeClass}`;
+        etaBadge.textContent = firstEta <= 1 ? "即將到站" : `${firstEta} 分鐘`;
+        heading.append(routeInfo, etaBadge);
+
+        const destination = document.createElement("div");
+        destination.className = "text-xs font-bold text-slate-700";
+        const destinationLabel = document.createElement("span");
+        destinationLabel.className = "text-blue-900 font-extrabold text-sm";
+        destinationLabel.textContent = group.dest || "";
+        destination.append(document.createTextNode("往 "), destinationLabel);
+        content.append(heading, destination);
+
+        const nextServices = document.createElement("div");
+        nextServices.className = "mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs";
+        const nextLabel = document.createElement("span");
+        nextLabel.className = "text-slate-400 text-[11px]";
+        nextLabel.textContent = "後續班次:";
+        const nextTimes = document.createElement("span");
+        nextTimes.className = "font-bold text-slate-600";
+        nextTimes.textContent = nextEtas;
+        nextServices.append(nextLabel, nextTimes);
+        card.append(content, nextServices);
+        container.appendChild(card);
+      });
+    }
+
+    function quickSelect(routeNum) {
+      document.getElementById("route-select").value = routeNum;
+      applyFilter();
+    }
+
+    // 初始化與 30 秒自動刷新
+    fetchLiveETA();
+    setInterval(fetchLiveETA, 30000);
+  </script>
+</body>
+</html>
