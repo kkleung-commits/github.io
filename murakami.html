@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f0e5">
+  <title>花花世界｜互動藝術繪本</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Serif+TC:wght@500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f0e5;
+      --paper-deep: #eee3d0;
+      --ink: #29231f;
+      --muted: #71685f;
+      --coral: #e85c4a;
+      --teal: #287c74;
+      --yellow: #f4c84a;
+      --blue: #436eaa;
+      --green: #6a9c5e;
+      --serif: 'Noto Serif TC', Georgia, serif;
+      --sans: 'DM Sans', 'Noto Serif TC', sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+    .page-shell { max-width: 1280px; margin: auto; padding: 18px 30px 28px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 48px; margin-bottom: 14px; }
+    .wordmark { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: 0; }
+    .wordmark-mark { width: 30px; height: 30px; display: grid; place-items: center; background: var(--yellow); border-radius: 50%; font-size: 17px; }
+    .toolbar { display: flex; align-items: center; gap: 8px; }
+    .icon-button, .quiet-button { min-height: 40px; border: 1px solid #d6cbbb; background: transparent; padding: 0 13px; border-radius: 5px; cursor: pointer; }
+    .icon-button:hover, .quiet-button:hover { background: white; }
+    .sync-strip { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #ded4c5; border-bottom: 1px solid #ded4c5; padding: 9px 2px; margin-bottom: 20px; color: var(--muted); font-size: 12px; }
+    .sync-label { color: var(--teal); font-weight: 700; }
+    .teacher-controls { display: flex; align-items: center; gap: 7px; }
+    .teacher-controls button { border: 0; border-radius: 4px; background: transparent; padding: 7px 9px; color: var(--muted); cursor: pointer; font-size: 12px; }
+    .teacher-controls button:hover, .teacher-controls button[aria-pressed="true"] { background: var(--paper-deep); color: var(--ink); }
+    .book { min-height: 610px; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(350px, .95fr); background: #fffaf1; box-shadow: 0 16px 46px #3a291218; border: 1px solid #e8ddcc; overflow: hidden; position: relative; }
+    .art-panel { min-height: 610px; position: relative; display: grid; place-items: center; overflow: hidden; background: #e5eee7; }
+    .art-panel::after { content: ''; pointer-events: none; position: absolute; inset: 18px; border: 1px solid #ffffff80; }
+    .artwork { width: 100%; height: 100%; min-height: 610px; display: grid; place-items: center; padding: 32px; }
+    .artwork svg { display: block; width: min(100%, 560px); max-height: 540px; }
+    .art-tag { position: absolute; left: 32px; top: 28px; z-index: 1; background: #fffaf1; padding: 7px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .story-panel { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(32px, 5vw, 72px); border-left: 1px solid #e8ddcc; }
+    .story-kicker { color: var(--teal); font-size: 12px; font-weight: 700; margin-bottom: 20px; }
+    h1, h2 { font-family: var(--serif); letter-spacing: 0; }
+    .story-panel h1 { font-size: clamp(35px, 5vw, 64px); line-height: 1.28; margin: 0 0 22px; font-weight: 900; }
+    .story-panel h1 span { display: block; color: var(--coral); }
+    .story-panel p { max-width: 38ch; margin: 0; color: #5b5249; font-size: 16px; line-height: 1.95; white-space: pre-line; }
+    .story-bottom { margin-top: 38px; }
+    .page-count { color: var(--muted); font-size: 11px; letter-spacing: 1px; margin-bottom: 14px; }
+    .page-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid #ded4c5; padding-top: 18px; }
+    .nav-button { min-height: 46px; padding: 0 16px; border: 1px solid #cfc2b0; background: transparent; border-radius: 4px; cursor: pointer; font-weight: 700; }
+    .nav-button.next { color: white; background: var(--ink); border-color: var(--ink); }
+    .nav-button:disabled { opacity: .35; cursor: default; }
+    .activity { display: none; margin-top: 22px; }
+    .activity.visible { display: block; }
+    .palette { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+    .swatch { width: 32px; height: 32px; padding: 0; border: 2px solid white; box-shadow: 0 0 0 1px #b8aa98; border-radius: 50%; cursor: pointer; }
+    .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+    .progress { color: var(--muted); font-size: 12px; margin-top: 11px; }
+    .garden { display: none; width: min(100%, 520px); margin: auto; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
+    .garden.visible { display: grid; }
+    .plot { min-height: 105px; border: 1px dashed #7a9a6d; background: #d7e4c9; border-radius: 45% 45% 5px 5px; font-size: 35px; cursor: pointer; }
+    .garden-note { display: none; position: absolute; bottom: 24px; color: #496242; background: #fffaf1dd; padding: 8px 12px; font-size: 12px; }
+    .garden-note.visible { display: block; }
+    .disclaimer { margin: 12px 0 0; text-align: right; color: #8c8173; font-size: 10px; }
+    .overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: #241e19a8; backdrop-filter: blur(7px); }
+    .overlay[hidden] { display: none; }
+    .dialog { width: min(620px, 100%); background: #fffaf1; border-radius: 8px; padding: clamp(24px, 5vw, 42px); box-shadow: 0 24px 80px #1c17134d; animation: appear .32s ease-out both; }
+    @keyframes appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .dialog h2 { margin: 0 0 8px; font-size: clamp(25px, 4vw, 34px); }
+    .dialog p { color: var(--muted); line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+    .entry-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .entry-button { min-height: 70px; border: 0; border-radius: 5px; background: #75503d; color: white; font-weight: 700; cursor: pointer; }
+    .entry-button.teal { background: var(--teal); }
+    .entry-button.offline { grid-column: 1 / -1; color: var(--ink); background: #eee2cd; }
+    .entry-help { background: #f1e7d5; border-radius: 4px; color: #756a5d; font-size: 12px; line-height: 1.65; padding: 12px; margin-top: 12px; }
+    .join-row { display: none; gap: 8px; margin-top: 12px; }
+    .join-row.visible { display: flex; }
+    .join-row input { flex: 1; min-width: 0; border: 1px solid #d6cbbb; border-radius: 4px; padding: 10px; text-transform: uppercase; }
+    .join-row button, .dialog-action { border: 0; background: var(--ink); color: white; padding: 0 15px; border-radius: 4px; cursor: pointer; }
+    .room-message { min-height: 20px; margin-top: 8px !important; color: var(--teal) !important; font-size: 12px !important; }
+    .zoom-backdrop { display: none; position: fixed; inset: 0; z-index: 15; background: #241e19b8; padding: 18px; }
+    .zoom-backdrop.visible { display: grid; place-items: center; }
+    .zoom-backdrop .book { width: min(1280px, 100%); height: min(88vh, 840px); min-height: 0; }
+    .zoom-backdrop .art-panel, .zoom-backdrop .artwork { min-height: 0; }
+    .zoom-close { position: fixed; right: 28px; top: 28px; z-index: 16; display: none; border: 0; background: #fffaf1; padding: 10px 14px; cursor: pointer; }
+    .zoom-close.visible { display: block; }
+    @media (max-width: 760px) {
+      .page-shell { padding: 12px 14px 22px; }
+      .topbar { align-items: flex-start; }
+      .wordmark { font-size: 11px; }
+      .icon-button { min-height: 36px; padding: 0 9px; font-size: 12px; }
+      .sync-strip { align-items: flex-start; flex-direction: column; }
+      .teacher-controls { flex-wrap: wrap; }
+      .book { min-height: 0; grid-template-columns: 1fr; }
+      .art-panel { min-height: 360px; max-height: 48vh; }
+      .artwork { min-height: 360px; padding: 26px; }
+      .artwork svg { max-height: 330px; }
+      .story-panel { min-height: 390px; padding: 30px 24px 24px; border-left: 0; border-top: 1px solid #e8ddcc; }
+      .story-panel h1 { font-size: 38px; }
+      .story-panel p { font-size: 14px; }
+      .story-bottom { margin-top: 24px; }
+      .zoom-backdrop { overflow: auto; }
+      .zoom-backdrop .book { height: auto; }
+      .zoom-backdrop .art-panel, .zoom-backdrop .artwork { min-height: 320px; }
+      .zoom-backdrop .story-panel { min-height: 350px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="wordmark"><span class="wordmark-mark" aria-hidden="true">✿</span><span>藝術觀察室　／　互動繪本</span></div>
+      <div class="toolbar">
+        <button class="icon-button" id="sound-toggle" type="button" aria-pressed="false" title="朗讀本頁">◖ 聲音關</button>
+        <button class="icon-button" id="zoom-toggle" type="button" title="放大圖書">⛶ 放大圖書</button>
+      </div>
+    </header>
+    <div class="sync-strip">
+      <div><span class="sync-label">● 本機互動</span>　<span id="room-status">房間同步示範未連接多人伺服器</span></div>
+      <nav class="teacher-controls" aria-label="繪本控制">
+        <button id="prev-top" type="button">← 上一頁</button>
+        <button id="activity-toggle" type="button" aria-pressed="false">✿ 活動／故事</button>
+        <button id="finish-button" type="button">✓ 完成創作</button>
+        <button id="reset-button" type="button">↻ 重新創作</button>
+        <button id="next-top" type="button">下一頁 →</button>
+      </nav>
+    </div>
+    <main class="book" id="book" aria-label="花花世界互動繪本">
+      <section class="art-panel" aria-label="繪本插畫">
+        <div class="art-tag" id="art-tag">Cover / 08</div>
+        <div class="artwork" id="artwork"></div>
+        <div class="garden-note" id="garden-note">花園裡的種子發芽了！</div>
+      </section>
+      <section class="story-panel">
+        <div>
+          <div class="story-kicker" id="story-kicker">一本可以摸一摸的藝術故事書</div>
+          <h1 id="story-title"></h1>
+          <p id="story-copy"></p>
+          <div class="activity" id="color-activity">
+            <div class="progress" id="color-progress">花瓣填色　0%</div>
+            <div class="palette" aria-label="選擇顏色">
+              <button class="swatch" type="button" style="background:#ed6455" data-color="#ed6455" aria-label="珊瑚紅" aria-pressed="true"></button>
+              <button class="swatch" type="button" style="background:#f3c94b" data-color="#f3c94b" aria-label="明亮黃" aria-pressed="false"></button>
+              <button class="swatch" type="button" style="background:#3e9b86" data-color="#3e9b86" aria-label="葉綠" aria-pressed="false"></button>
+              <button class="swatch" type="button" style="background:#5285c3" data-color="#5285c3" aria-label="天空藍" aria-pressed="false"></button>
+              <button class="swatch" type="button" style="background:#e58aa2" data-color="#e58aa2" aria-label="桃粉" aria-pressed="false"></button>
+            </div>
+          </div>
+          <div class="activity" id="garden-activity">
+            <div class="progress">選一塊花圃，種下一朵花。</div>
+          </div>
+        </div>
+        <div class="story-bottom">
+          <div class="page-count" id="page-count">封面</div>
+          <div class="page-nav">
+            <button class="nav-button" id="prev-button" type="button">← 上一頁</button>
+            <button class="nav-button next" id="next-button" type="button">翻開圖書 →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <p class="disclaimer">原創互動插畫與教學示範；非藝術家原作或紀錄照片。多人同步需另行設定後端。</p>
+  </div>
+
+  <div class="overlay" id="entry-overlay" role="dialog" aria-modal="true" aria-labelledby="entry-title">
+    <section class="dialog">
+      <h2 id="entry-title">✿ 課堂同步・互動繪本</h2>
+      <p>一起翻開花花世界。選擇課堂模式，或先在這部裝置開始探索。</p>
+      <div class="entry-buttons">
+        <button class="entry-button" id="create-room" type="button">▣ 電子白板<br>建立示範房間</button>
+        <button class="entry-button teal" id="join-room" type="button">▦ 學生平板<br>輸入房間碼</button>
+        <button class="entry-button offline" id="start-alone" type="button">單機使用（不連線）</button>
+      </div>
+      <div class="join-row" id="join-row">
+        <input id="room-input" maxlength="6" placeholder="輸入 6 位房間碼" aria-label="房間碼">
+        <button id="submit-room" type="button">加入</button>
+      </div>
+      <p class="room-message" id="room-message" role="status"></p>
+      <div class="entry-help">此仿作提供本機互動示範。建立的房間碼只儲存在目前瀏覽器，不能讓不同裝置即時同步。</div>
+    </section>
+  </div>
+  <div class="zoom-backdrop" id="zoom-backdrop" aria-hidden="true"></div>
+  <button class="zoom-close" id="zoom-close" type="button">縮小圖書　×</button>
+
+  <script>
+    const pages = [
+      { tag: 'Cover / 08', kicker: '一本可以摸一摸的藝術故事書', title: '村上隆的<span>花花世界</span>', copy: '一朵花，怎樣變成一個繽紛的世界？\n翻開這本書，一起認識藝術家村上隆。', count: '封面', art: 'cover' },
+      { tag: '01 / 08', kicker: '東京・1962', title: '從東京開始<span>的故事</span>', copy: '1962 年，村上隆在日本東京出生。長大後，他到藝術大學學習日本的傳統繪畫。', count: '01 / 08', art: 'tokyo' },
+      { tag: '02 / 08', kicker: '觀察與學習', title: '古老畫法<span>的新眼睛</span>', copy: '他仔細觀察日本繪畫裡的線條、顏色和留白，也思考藝術如何走進每個人的生活。', count: '02 / 08', art: 'studio' },
+      { tag: '03 / 08', kicker: '把想法放在一起', title: '傳統遇見<span>流行文化</span>', copy: '村上隆把傳統藝術的美感，和漫畫、動畫等當代文化的想像放在一起，發展自己的創作方法。', count: '03 / 08', art: 'shapes' },
+      { tag: '04 / 08', kicker: '重複裡的變化', title: '一朵花，變成<span>一整座花園</span>', copy: '相同的形狀一次又一次出現，顏色、表情和排列卻不一樣。你看到哪些相同？又發現哪些不同？', count: '04 / 08', art: 'garden' },
+      { tag: '05 / 08', kicker: '互動活動・填色', title: '把花瓣<span>一片片喚醒</span>', copy: '選一種顏色，再點花瓣為它上色。試試看：重複的花瓣，也可以有自己的表情。', count: '05 / 08', art: 'color' },
+      { tag: '06 / 08', kicker: '互動活動・種花', title: '種下一朵<span>你的想像</span>', copy: '點選花圃，讓新花朵加入這片花園。試著安排顏色和位置，看看畫面會怎麼改變。', count: '06 / 08', art: 'plant' },
+      { tag: '07 / 08', kicker: '輪到你創作', title: '讓想像<span>繼續盛開</span>', copy: '你可以從身邊的形狀開始，重複、排列、改變顏色，創作一個屬於自己的小世界。', count: '07 / 08', art: 'end' }
+    ];
+    const flowerColors = ['#ec6555', '#f3c94b', '#56a98d', '#5484c1', '#e88ca2', '#f09b43', '#845f9f', '#87b9d1'];
+    let pageIndex = 0;
+    let selectedColor = '#ed6455';
+    let paintedPetals = new Set();
+    let petalPaints = Array(8).fill(null);
+    let isSoundOn = false;
+    let gardenFlowers = new Set();
+
+    function petalFlower({ face = false, small = false, painted = false, className = '' } = {}) {
+      const petals = flowerColors.map((color, index) => {
+        const angle = index * 45;
+        return `<path class="petal" data-petal="${index}" tabindex="0" role="button" aria-label="花瓣 ${index + 1}" d="M0 -20 C-19 -37 -17 -65 0 -70 C17 -65 19 -37 0 -20Z" transform="rotate(${angle})" fill="${painted && petalPaints[index] ? petalPaints[index] : color}" stroke="#28231f" stroke-width="2.3"/>`;
+      }).join('');
+      return `<svg class="${className}" viewBox="0 0 400 400" role="img" aria-label="原創繽紛花朵插畫"><circle cx="200" cy="200" r="175" fill="#d5e5dd"/>${[0,1,2].map(i => `<path d="M${92+i*105} 350 Q${155+i*20} 250 ${175+i*20} 172" fill="none" stroke="#547f5e" stroke-width="9"/>`).join('')}<g transform="translate(200 195) scale(${small ? .83 : 1})">${petals}<circle class="flower-center" cx="0" cy="0" r="27" fill="#f7e9ae" stroke="#28231f" stroke-width="2.5"/>${face ? '<circle cx="-9" cy="-4" r="2.8"/><circle cx="9" cy="-4" r="2.8"/><path d="M-9 7 Q0 16 9 7" fill="none" stroke="#28231f" stroke-width="2.5" stroke-linecap="round"/>' : ''}</g>${face ? '<path d="M105 306 Q200 270 295 306" fill="none" stroke="#287c74" stroke-width="7"/>' : ''}</svg>`;
+    }
+
+    function sceneFor(kind) {
+      if (kind === 'color') return petalFlower({ face: true, painted: true });
+      if (kind === 'plant') {
+        return `<div class="garden visible" id="garden-grid">${Array.from({ length: 9 }, (_, i) => `<button class="plot" type="button" data-plot="${i}" aria-label="花圃 ${i + 1}">${gardenFlowers.has(i) ? '✿' : '+'}</button>`).join('')}</div>`;
+      }
+      const palette = kind === 'tokyo' ? ['#ef8d5d','#f4c84a','#568bb6'] : kind === 'studio' ? ['#d58267','#4b8c81','#e3c36d'] : ['#e85c4a','#f4c84a','#4781ae'];
+      const skyline = kind === 'tokyo' ? '<path d="M50 300h65v-95h42v95h47V175h50v125h35v-70h48v70h40" fill="#527f92"/><path d="M167 175l20-42 20 42" fill="#e85c4a"/>' : '';
+      const shapes = Array.from({ length: kind === 'end' ? 5 : 3 }, (_, i) => `<g transform="translate(${115 + i*90} ${140 + (i%2)*125})"><circle r="43" fill="${palette[i%3]}" stroke="#28231f" stroke-width="3"/><path d="M-19 0h38M0-19v38" stroke="#fffaf1" stroke-width="7" stroke-linecap="round"/></g>`).join('');
+      return `<svg viewBox="0 0 500 430" role="img" aria-label="故事插畫：${pages[pageIndex].kicker}"><rect width="500" height="430" rx="8" fill="${kind === 'tokyo' ? '#dce9e7' : '#f1e4cb'}"/><circle cx="395" cy="86" r="39" fill="#f3c94b"/>${skyline}<path d="M0 335 Q120 290 240 340 T500 324V430H0Z" fill="#6c9b69"/>${shapes}<path d="M75 354 Q115 256 148 196 M300 363 Q324 280 363 222" fill="none" stroke="#426e4c" stroke-width="8"/>${kind === 'garden' ? petalFlower({ face: true, small: true }) : ''}<text x="24" y="405" fill="#28231f" font-family="serif" font-size="16">${kind === 'tokyo' ? '東京・日本' : kind === 'studio' ? '看見線條、色彩與形狀' : kind === 'shapes' ? '觀察・重複・變化' : kind === 'end' ? '你的故事，從這裡開始' : '花朵可以有很多模樣'}</text></svg>`;
+    }
+
+    const artwork = document.getElementById('artwork');
+    function updatePage() {
+      const page = pages[pageIndex];
+      document.getElementById('art-tag').textContent = page.tag;
+      document.getElementById('story-kicker').textContent = page.kicker;
+      document.getElementById('story-title').innerHTML = page.title;
+      document.getElementById('story-copy').textContent = page.copy;
+      document.getElementById('page-count').textContent = page.count;
+      artwork.innerHTML = page.art === 'cover' ? petalFlower({ face: true }) : sceneFor(page.art);
+      document.getElementById('color-activity').classList.toggle('visible', page.art === 'color');
+      document.getElementById('garden-activity').classList.toggle('visible', page.art === 'plant');
+      document.getElementById('prev-button').disabled = pageIndex === 0;
+      document.getElementById('prev-top').disabled = pageIndex === 0;
+      document.getElementById('next-button').disabled = pageIndex === pages.length - 1;
+      document.getElementById('next-top').disabled = pageIndex === pages.length - 1;
+      document.getElementById('next-button').textContent = pageIndex === 0 ? '翻開圖書 →' : pageIndex === pages.length - 1 ? '故事完' : '下一頁 →';
+      document.getElementById('activity-toggle').setAttribute('aria-pressed', String(page.art === 'color' || page.art === 'plant'));
+      document.getElementById('color-progress').textContent = `花瓣填色　${Math.round(paintedPetals.size / 8 * 100)}%`;
+    }
+
+    function changePage(delta) {
+      pageIndex = Math.max(0, Math.min(pages.length - 1, pageIndex + delta));
+      updatePage();
+      if (isSoundOn) speakCurrentPage();
+    }
+    document.getElementById('prev-button').addEventListener('click', () => changePage(-1));
+    document.getElementById('next-button').addEventListener('click', () => changePage(1));
+    document.getElementById('prev-top').addEventListener('click', () => changePage(-1));
+    document.getElementById('next-top').addEventListener('click', () => changePage(1));
+    document.getElementById('activity-toggle').addEventListener('click', () => {
+      pageIndex = pageIndex < 5 ? 5 : pageIndex === 5 ? 6 : 5;
+      updatePage();
+    });
+    document.querySelectorAll('.swatch').forEach(button => button.addEventListener('click', () => {
+      selectedColor = button.dataset.color;
+      document.querySelectorAll('.swatch').forEach(swatch => swatch.setAttribute('aria-pressed', String(swatch === button)));
+    }));
+    function paintPetal(petal) {
+      petal.setAttribute('fill', selectedColor);
+      paintedPetals.add(Number(petal.dataset.petal));
+      petalPaints[Number(petal.dataset.petal)] = selectedColor;
+      document.getElementById('color-progress').textContent = `花瓣填色　${Math.round(paintedPetals.size / 8 * 100)}%`;
+    }
+    artwork.addEventListener('click', event => {
+      const petal = event.target.closest('[data-petal]');
+      if (petal && pages[pageIndex].art === 'color') {
+        paintPetal(petal);
+      }
+      const plot = event.target.closest('[data-plot]');
+      if (plot) {
+        const index = Number(plot.dataset.plot);
+        gardenFlowers.add(index);
+        plot.textContent = ['🌼','🌷','🌻','🌺','🌸'][index % 5];
+        document.getElementById('garden-note').classList.add('visible');
+      }
+    });
+    artwork.addEventListener('keydown', event => {
+      const petal = event.target.closest('[data-petal]');
+      if (petal && pages[pageIndex].art === 'color' && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        paintPetal(petal);
+      }
+    });
+    document.getElementById('finish-button').addEventListener('click', () => {
+      if (pages[pageIndex].art === 'color' && paintedPetals.size < 8) {
+        document.getElementById('color-progress').textContent = `再為 ${8 - paintedPetals.size} 片花瓣選個顏色吧！`;
+      } else {
+        pageIndex = Math.min(pageIndex + 1, pages.length - 1);
+        updatePage();
+      }
+    });
+    document.getElementById('reset-button').addEventListener('click', () => {
+      paintedPetals.clear(); petalPaints = Array(8).fill(null); gardenFlowers.clear();
+      updatePage();
+      document.getElementById('garden-note').classList.remove('visible');
+    });
+
+    function speakCurrentPage() {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(`${pages[pageIndex].kicker}。${pages[pageIndex].copy}`);
+      utterance.lang = 'zh-HK';
+      window.speechSynthesis.speak(utterance);
+    }
+    document.getElementById('sound-toggle').addEventListener('click', event => {
+      isSoundOn = !isSoundOn;
+      event.currentTarget.setAttribute('aria-pressed', String(isSoundOn));
+      event.currentTarget.textContent = isSoundOn ? '◖ 聲音開' : '◖ 聲音關';
+      if (isSoundOn) speakCurrentPage(); else if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
+
+    const zoomBackdrop = document.getElementById('zoom-backdrop');
+    const zoomClose = document.getElementById('zoom-close');
+    function toggleZoom(open) {
+      zoomBackdrop.classList.toggle('visible', open);
+      zoomBackdrop.setAttribute('aria-hidden', String(!open));
+      zoomClose.classList.toggle('visible', open);
+      if (open) zoomBackdrop.append(document.getElementById('book'));
+      else document.querySelector('.page-shell').insertBefore(document.getElementById('book'), document.querySelector('.disclaimer'));
+    }
+    document.getElementById('zoom-toggle').addEventListener('click', () => toggleZoom(true));
+    zoomClose.addEventListener('click', () => toggleZoom(false));
+    zoomBackdrop.addEventListener('click', event => { if (event.target === zoomBackdrop) toggleZoom(false); });
+
+    const entryOverlay = document.getElementById('entry-overlay');
+    document.getElementById('start-alone').addEventListener('click', () => entryOverlay.hidden = true);
+    document.getElementById('create-room').addEventListener('click', () => {
+      const room = Math.random().toString(36).slice(2, 8).toUpperCase();
+      try { localStorage.setItem('flowerbook-demo-room', room); } catch {}
+      document.getElementById('room-message').textContent = `本機示範房間碼：${room}（不會同步至其他裝置）`;
+      document.getElementById('room-status').textContent = `示範房間碼 ${room} · 同一瀏覽器限定`;
+      entryOverlay.hidden = true;
+    });
+    document.getElementById('join-room').addEventListener('click', () => {
+      document.getElementById('join-row').classList.add('visible');
+      document.getElementById('room-input').focus();
+    });
+    document.getElementById('submit-room').addEventListener('click', () => {
+      const input = document.getElementById('room-input').value.trim().toUpperCase();
+      let room = '';
+      try { room = localStorage.getItem('flowerbook-demo-room') || ''; } catch {}
+      if (input && input === room) {
+        document.getElementById('room-message').textContent = '已加入本機示範房間。';
+        document.getElementById('room-status').textContent = `已加入示範房間 ${room} · 同一瀏覽器限定`;
+        entryOverlay.hidden = true;
+      } else {
+        document.getElementById('room-message').textContent = '找不到這個本機房間碼；請在同一瀏覽器建立房間。';
+      }
+    });
+    updatePage();
+  </script>
+</body>
+</html>
