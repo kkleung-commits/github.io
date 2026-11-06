@@ -9,6 +9,15 @@
 
 「花花世界」的功能、Firebase 建置、資料庫安全規則、測試和發佈方式，請參閱[繪本使用與設定指南](./MURAKAMI.md)。
 
+## 在 VS Code 更新後繼續「花花世界」
+
+1. 在 VS Code 開啟此 repository（`github.io`）。
+2. 先閱讀[花花世界專案指南](./MURAKAMI.md)，了解目前功能、Firebase 規則和部署方式。
+3. 要繼續處理本專案時，可在 Copilot Chat 輸入 `/murakami-project`，或直接說「繼續花花世界專案」；專案 Skill 會先檢查 Git 狀態並閱讀相關文件。
+4. 最新已推送版本記錄可用 `git log -5 --oneline` 查看；目前主要分支為 `main`。
+
+專案 Skill 位於 [`.github/skills/murakami-project/SKILL.md`](./.github/skills/murakami-project/SKILL.md)，隨 GitHub repository 保存；不依賴舊 VS Code 安裝或本機聊天紀錄。
+
 ---
 
 ## 尋找開與關 - 特教課室眼動互動遊戲

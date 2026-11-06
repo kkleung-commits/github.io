@@ -18,6 +18,16 @@
 - 教師可結束房間並立即刪除房間資料；不設定自動清理排程。
 - 不連線的單機模式不需要 Firebase。
 
+## 專案目前狀態（2026-11-06）
+
+- GitHub repository：[`kkleung-commits/github.io`](https://github.com/kkleung-commits/github.io)，主要分支 `main`。
+- 最新已推送功能版本：`57c01f8`（`feat: add manual room closure`）。
+- Firebase Realtime Database 規則已由專案管理者在 Firebase Console 更新；管理者回報房間功能目前正常。
+- 房間由建立者手動結束並永久刪除，不設定 Cloud Functions、Cloud Scheduler 或自動清理。
+- 舊房間若缺少 `ownerUid`，需在 Firebase Console 手動確認及刪除。
+- 下次接續先查看 `git status`、`git log -5 --oneline`，再依本指南確認 Firebase 規則、測試和發佈狀態。
+- VS Code Copilot 專案 Skill：[`.github/skills/murakami-project/SKILL.md`](./.github/skills/murakami-project/SKILL.md)。
+
 ## 開始使用
 
 ### 體驗繪本
@@ -53,7 +63,7 @@
 
 ### Realtime Database 規則
 
-最新規則保存在 [`database.rules.json`](./database.rules.json)。將以下內容放在 Realtime Database 的 **Rules** 頁面並按 **Publish**；它限制房間資料讀取給房間成員，只允許房間建立者建立和刪除房間，並允許成員更新狀態及活動時間。
+最新規則保存在 [`database.rules.json`](./database.rules.json)。將以下內容放在 Realtime Database 的 **Rules** 頁面並按 **Publish**；它限制房間資料讀取給房間成員，只允許房間建立者建立和刪除房間，並允許成員更新房間狀態。
 
 ```json
 {
