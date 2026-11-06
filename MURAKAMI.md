@@ -32,6 +32,7 @@
 ## Firebase 專案設定
 
 本頁已設定 Firebase Web App 的公開前端設定，Realtime Database 網址位於新加坡區域。首次部署到新網域時，仍需在 Firebase Console 確認 Authentication、資料庫規則和允許的網域。
+頁面入場視窗提供「教師：查看 Firebase 設定說明」連結，方便老師直接開啟本指南。
 
 1. 在 [Firebase Console](https://console.firebase.google.com/) 開啟此專案。
 2. 在 **Build → Authentication → Sign-in method** 啟用 **Anonymous** 登入。

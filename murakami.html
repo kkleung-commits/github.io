@@ -81,6 +81,7 @@
     .entry-button.teal { background: var(--teal); }
     .entry-button.offline { grid-column: 1 / -1; color: var(--ink); background: #eee2cd; }
     .entry-help { background: #f1e7d5; border-radius: 4px; color: #756a5d; font-size: 12px; line-height: 1.65; padding: 12px; margin-top: 12px; }
+    .entry-help a { display: inline-block; margin-top: 5px; color: var(--teal); font-weight: 700; }
     .join-row { display: none; gap: 8px; margin-top: 12px; }
     .join-row.visible { display: flex; }
     .join-row input { flex: 1; min-width: 0; border: 1px solid #d6cbbb; border-radius: 4px; padding: 10px; text-transform: uppercase; }
@@ -186,30 +187,9 @@
       </div>
       <p class="room-message" id="room-message" role="status"></p>
       <div class="entry-help">
-        跨裝置同步需在 Firebase 建立 Realtime Database、啟用匿名驗證，並套用下方資料庫規則。請透過 localhost 或 HTTPS 開啟頁面，並只將房間碼分享給要加入的人。
-        <details>
-          <summary>查看 Realtime Database 安全規則</summary>
-          <pre>{
-  "rules": {
-    "rooms": {
-      "$room": {
-        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
-        ".write": "auth != null && !data.exists() && newData.child('members').child(auth.uid).exists() && newData.child('state').exists()",
-        "members": {
-          "$uid": {
-            ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($room).exists()",
-            ".validate": "newData.hasChild('joinedAt') && newData.child('joinedAt').isNumber()"
-          }
-        },
-        "state": {
-          ".write": "auth != null && root.child('rooms').child($room).child('members').child(auth.uid).exists()",
-          ".validate": "newData.hasChild('pageIndex') && newData.child('pageIndex').isNumber() && newData.child('pageIndex').val() >= 0 && newData.child('pageIndex').val() <= 7"
-        }
-      }
-    }
-  }
-}</pre>
-        </details>
+        課堂同步需連接網絡，並輸入老師提供的房間碼。<br>
+        不需要同步？請選「單機使用」。<br>
+        <a href="https://github.com/kkleung-commits/github.io/blob/main/MURAKAMI.md#firebase-專案設定" target="_blank" rel="noopener noreferrer">教師：查看 Firebase 設定說明</a>
       </div>
     </section>
   </div>
