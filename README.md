@@ -1,4 +1,17 @@
-﻿# 尋找開與關 - 特教課室眼動互動遊戲
+# 互動教學作品集
+
+本 repository 收錄互動教學原型，使用者可透過 GitHub Pages 體驗：
+
+| 作品 | 說明 | 網頁 |
+|---|---|---|
+| 尋找開與關 | 以香港粵語為主的特教課室眼動互動遊戲 | [開啟遊戲](https://kkleung-commits.github.io/github.io/) |
+| 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步的互動藝術繪本 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) |
+
+「花花世界」的功能、Firebase 建置、資料庫安全規則、測試和發佈方式，請參閱[繪本使用與設定指南](./MURAKAMI.md)。
+
+---
+
+## 尋找開與關 - 特教課室眼動互動遊戲
 
 這是一個以香港粵語為主、適合特教課室使用的互動遊戲原型，重點是讓學生透過「開關」概念、聲音提示與簡單互動，練習觀察、辨識與操作。
 
@@ -33,8 +46,8 @@
 ## 版本狀態
 
 - 基礎版本標籤：v0.1.0-ipad
-- 教師設定及本機學習統計：目前工作版本，尚未發布至 GitHub Pages
-- 最後更新：2026-10-30
+- 教師設定及本機學習統計：已納入目前 GitHub Pages 首頁版本
+- 最後更新：2026-11-06
 - 狀態：原型 / 可展示測試版本
 
 ## iPad 採用重點
@@ -61,7 +74,7 @@
 - Repository: https://github.com/kkleung-commits/github.io
 - GitHub Pages: https://kkleung-commits.github.io/github.io/
 - Pages branch: main
-- Development branch: master
+- Development branch: main
 - Tag: v0.1.0-ipad
 
 ## 未來發展方向
