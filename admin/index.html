@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="心光恩望學校 2025-2026 學校行政小組工作架構">
+    <title>心光恩望學校 - 行政小組工作架構</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        summary { list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+        details[open] .section-icon { transform: rotate(180deg); }
+        .section-icon { transition: transform 0.2s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased p-4 md:p-8">
+    <main class="max-w-6xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+        <header class="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 text-white text-center">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide">心光恩望學校</h1>
+            <p class="text-teal-100 mt-2 font-medium tracking-wider">2025-2026 學校行政小組工作架構</p>
+        </header>
+
+        <section class="p-4 md:p-6" aria-label="行政架構">
+            <div class="mb-5">
+                <label for="search" class="block text-sm font-bold text-gray-700 mb-1">搜尋委員會、小組或教職員</label>
+                <input id="search" type="search" autocomplete="off"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-600"
+                    placeholder="輸入名稱或人名">
+                <p id="resultCount" class="mt-2 text-sm text-gray-600" aria-live="polite"></p>
+            </div>
+
+            <div id="loading" class="py-12 text-center text-gray-600" role="status">
+                正在載入最新資料…
+            </div>
+            <div id="error" class="hidden rounded-lg border border-red-200 bg-red-50 p-4 text-red-800" role="alert">
+                <p id="errorMessage">資料載入失敗，請稍後再試。</p>
+                <button id="retryButton" type="button" class="mt-3 rounded bg-red-700 px-4 py-2 font-bold text-white hover:bg-red-800">
+                    重新載入
+                </button>
+            </div>
+            <div id="empty" class="hidden py-12 text-center text-gray-600"></div>
+            <div id="architecture-container" class="space-y-4"></div>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzKXz5R6o0D-epFvPddbBiQZYvcJJql7IRniI4fMTZ9A-Dqz-gmPYPr-BQep_aJVsqk/exec";
+        const container = document.getElementById('architecture-container');
+        const searchInput = document.getElementById('search');
+        const loading = document.getElementById('loading');
+        const errorPanel = document.getElementById('error');
+        const emptyMessage = document.getElementById('empty');
+        const resultCount = document.getElementById('resultCount');
+        let allData = [];
+
+        document.getElementById('retryButton').addEventListener('click', fetchArchitectureData);
+        searchInput.addEventListener('input', renderArchitecture);
+        fetchArchitectureData();
+
+        async function fetchArchitectureData() {
+            loading.classList.remove('hidden');
+            errorPanel.classList.add('hidden');
+            emptyMessage.classList.add('hidden');
+            container.replaceChildren();
+            resultCount.textContent = '';
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error(`伺服器回應 ${response.status}`);
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('資料格式不正確');
+                allData = data;
+                renderArchitecture();
+            } catch (error) {
+                document.getElementById('errorMessage').textContent =
+                    `資料載入失敗：${error.message || '網絡連線異常'}`;
+                errorPanel.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function addTextElement(parent, tagName, className, text) {
+            const element = document.createElement(tagName);
+            element.className = className;
+            element.textContent = text || '';
+            parent.append(element);
+            return element;
+        }
+
+        function renderArchitecture() {
+            const query = searchInput.value.trim().toLocaleLowerCase();
+            const committees = new Map();
+            let visibleGroups = 0;
+            container.replaceChildren();
+            emptyMessage.classList.add('hidden');
+
+            for (const item of allData) {
+                const searchableText = [
+                    item.committee, item.category, item.groupName,
+                    item.chair, item.leader, item.members
+                ].filter(Boolean).join(' ').toLocaleLowerCase();
+                if (query && !searchableText.includes(query)) continue;
+
+                if (!committees.has(item.committee)) committees.set(item.committee, new Map());
+                const categories = committees.get(item.committee);
+                if (!categories.has(item.category)) categories.set(item.category, []);
+                categories.get(item.category).push(item);
+                visibleGroups++;
+            }
+
+            for (const [committeeName, categories] of committees) {
+                const section = document.createElement('details');
+                section.className = 'overflow-hidden rounded-lg border border-gray-200 shadow-sm';
+                if (query || container.childElementCount === 0) section.open = true;
+
+                const summary = document.createElement('summary');
+                summary.className = 'flex cursor-pointer items-center justify-between bg-gray-100 p-4 text-lg font-bold text-teal-800 hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-teal-700';
+                addTextElement(summary, 'span', '', committeeName);
+                const icon = document.createElement('span');
+                icon.className = 'section-icon text-teal-700';
+                icon.setAttribute('aria-hidden', 'true');
+                icon.textContent = '⌄';
+                summary.append(icon);
+                section.append(summary);
+
+                const content = document.createElement('div');
+                content.className = 'space-y-6 p-4';
+                for (const [categoryName, groups] of categories) {
+                    const category = document.createElement('section');
+                    addTextElement(category, 'h2', 'mb-3 rounded border-l-4 border-emerald-500 bg-emerald-50 px-3 py-1.5 font-bold text-emerald-800', categoryName);
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-1 gap-4 md:grid-cols-2';
+
+                    for (const group of groups) {
+                        const card = document.createElement('article');
+                        card.className = 'rounded-lg border border-gray-100 bg-gray-50 p-4';
+                        addTextElement(card, 'h3', 'mb-2 border-b border-gray-200 pb-2 font-bold text-gray-900', group.groupName);
+                        appendRole(card, '主席', group.chair, 'bg-amber-100 text-amber-900');
+                        appendRole(card, '組長', group.leader, 'bg-blue-100 text-blue-900');
+                        appendRole(card, '組員', group.members, 'bg-gray-200 text-gray-800');
+                        grid.append(card);
+                    }
+
+                    category.append(grid);
+                    content.append(category);
+                }
+                section.append(content);
+                container.append(section);
+            }
+
+            resultCount.textContent = query
+                ? `找到 ${visibleGroups} 個相關小組`
+                : `共 ${visibleGroups} 個小組`;
+            if (visibleGroups === 0) {
+                emptyMessage.textContent = query ? '找不到符合的資料，請嘗試其他關鍵字。' : '目前沒有可顯示的資料。';
+                emptyMessage.classList.remove('hidden');
+            }
+        }
+
+        function appendRole(card, label, value, colorClass) {
+            if (!value) return;
+            const row = document.createElement('div');
+            row.className = 'mb-2 flex items-start gap-2 text-sm last:mb-0';
+            addTextElement(row, 'span', `shrink-0 rounded px-2 py-0.5 text-xs font-bold ${colorClass}`, label);
+            addTextElement(row, 'span', 'break-words leading-relaxed text-gray-700', value);
+            card.append(row);
+        }
+    </script>
+</body>
+</html>
