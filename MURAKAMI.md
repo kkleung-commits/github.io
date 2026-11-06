@@ -15,6 +15,7 @@
 - 放大圖書，方便投影或課堂展示。
 - 建立 6 位英數房間碼，讓不同裝置加入同一個房間。
 - 即時同步頁碼、已填色花瓣及已種下的花。
+- 教師可結束房間並立即刪除房間資料；不設定自動清理排程。
 - 不連線的單機模式不需要 Firebase。
 
 ## 開始使用
@@ -28,6 +29,14 @@
 教師先按「建立房間」，再把畫面顯示的房間碼提供給學生。學生在另一部裝置開啟相同網頁，選擇「輸入房間碼」並按「加入」。加入後，房間成員的頁碼和創作會即時同步。
 
 請只把房間碼分享給該課堂參與者。知道房間碼的人可以嘗試加入房間。
+
+### 結束房間
+
+建立房間的教師可按控制列中的「結束房間」，再確認永久刪除。其他裝置會收到房間結束／失效提示，並停止同步。房間資料刪除後不能復原。
+
+房間不會自動清理。結束後，房間及其中的同步創作會從 Realtime Database 刪除，無法透過本程式復原；若教師忘記結束房間，資料會繼續保留，直到教師在 Firebase Console 手動刪除。
+
+舊版建立的房間沒有建立者欄位，無法使用頁面上的結束功能；請在 Realtime Database Console 確認不再使用後手動刪除。請勿在仍有課堂使用時刪除房間。
 
 ## Firebase 專案設定
 
@@ -44,7 +53,7 @@
 
 ### Realtime Database 規則
 
-將以下內容放在 Realtime Database 的 **Rules** 頁面。此規則要求登入、限制房間資料讀取給房間成員，並只允許建立者建立房間；房間成員可寫入創作狀態。
+最新規則保存在 [`database.rules.json`](./database.rules.json)。將以下內容放在 Realtime Database 的 **Rules** 頁面並按 **Publish**；它限制房間資料讀取給房間成員，只允許房間建立者建立和刪除房間，並允許成員更新狀態及活動時間。
 
 ```json
 {
@@ -52,7 +61,10 @@
     "rooms": {
       "$room": {
         ".read": "auth != null && data.child('members').child(auth.uid).exists()",
-        ".write": "auth != null && !data.exists() && newData.child('members').child(auth.uid).exists() && newData.child('state').exists()",
+        ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('members').child(auth.uid).exists() && newData.child('state').exists()) || (data.exists() && data.child('ownerUid').val() === auth.uid && !newData.exists()))",
+        "ownerUid": {
+          ".validate": "newData.isString()"
+        },
         "members": {
           "$uid": {
             ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($room).exists()",
@@ -78,6 +90,7 @@
 ```text
 rooms/
   ABC123/
+    ownerUid: "Firebase 匿名使用者 UID"
     members/
       {Firebase 匿名使用者 UID}/
         joinedAt: timestamp
@@ -89,15 +102,22 @@ rooms/
         0: true
 ```
 
-資料不包含學生姓名。房間資料目前不會自動過期；使用後可在 Firebase Console 的 Realtime Database 資料頁刪除 `rooms/{房間碼}`。刪除前請確認房間已不再使用。
+資料不包含學生姓名。房間只會在建立者按下「結束房間」後刪除；本專案不會部署自動清理排程或保留已結束房間的資料。若忘記結束，房間會繼續留在 Realtime Database，需到 Firebase Console 手動刪除 `rooms/{房間碼}`。
+
+### 發佈資料庫規則
+
+本專案只使用 Firebase Authentication 和 Realtime Database，不需部署 Cloud Functions 或 Cloud Scheduler。建立、同步及刪除房間會使用 Realtime Database；Firebase 是否收費取決於專案方案和實際用量，請在 Firebase Console 查看用量及 [Firebase 定價](https://firebase.google.com/pricing)。
+
+在 Firebase Console 的 **Build → Realtime Database → Rules** 貼上本指南或 [`database.rules.json`](./database.rules.json) 的規則並按 **Publish**。若已安裝 Firebase CLI 並選取 `enhs01` 專案，也可在 repository 根目錄執行 `firebase deploy --only database`。發布規則後，再發佈新版 `murakami.html`。
 
 ## 安全與隱私
 
 - Firebase Web App 設定中的 `apiKey` 是瀏覽器端識別設定，並非管理員密碼；資料存取應由 Authentication 和 Realtime Database 規則保護。
+- 建立者按下「結束房間」會永久刪除整個 `rooms/{房間碼}`；本專案不會自動刪除房間。
 - 不要把 Firebase Service Account 私密金鑰、管理員憑證或其他秘密放進 HTML、GitHub 或公開分享。
 - 匿名登入可辨識目前瀏覽器的 Firebase 使用者，但不代表房間碼具有邀請者身份驗證。請勿在房間內同步個人或敏感資料。
 - 公開 GitHub Pages 的所有訪客均可載入頁面程式。請定期檢查資料庫規則及 Firebase 用量。
-- 房間目前沒有自動清理或閒置逾期機制，請在 Firebase Console 手動移除不再使用的房間。
+- 舊版房間沒有 `ownerUid` 欄位，不支援頁面結束房間，需在 Firebase Console 手動移除。
 - 同一房間多人同時操作時，最後寫入的頁碼或同一項狀態會成為目前值。
 
 ## 常見問題
@@ -124,6 +144,7 @@ rooms/
 - [ ] 其中一個裝置翻頁，另一個裝置會更新到相同頁碼。
 - [ ] 花瓣填色和種花狀態會同步到房間其他裝置。
 - [ ] 未加入房間的匿名使用者不能讀取該房間狀態。
+- [ ] 建立者可確認並結束房間；其他裝置會停止同步。
 
 ## 發佈更新
 

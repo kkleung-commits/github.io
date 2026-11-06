@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "rooms": {
+      "$room": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+        ".write": "auth != null && ((!data.exists() && newData.child('ownerUid').val() === auth.uid && newData.child('members').child(auth.uid).exists() && newData.child('state').exists()) || (data.exists() && data.child('ownerUid').val() === auth.uid && !newData.exists()))",
+        "ownerUid": {
+          ".validate": "newData.isString()"
+        },
+        "members": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms').child($room).exists()",
+            ".validate": "newData.hasChild('joinedAt') && newData.child('joinedAt').isNumber()"
+          }
+        },
+        "state": {
+          ".write": "auth != null && root.child('rooms').child($room).child('members').child(auth.uid).exists()",
+          ".validate": "newData.hasChild('pageIndex') && newData.child('pageIndex').isNumber() && newData.child('pageIndex').val() >= 0 && newData.child('pageIndex').val() <= 7"
+        }
+      }
+    }
+  }
+}

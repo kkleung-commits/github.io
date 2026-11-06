@@ -5,7 +5,7 @@
 | 作品 | 說明 | 網頁 |
 |---|---|---|
 | 尋找開與關 | 以香港粵語為主的特教課室眼動互動遊戲 | [開啟遊戲](https://kkleung-commits.github.io/github.io/) |
-| 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步的互動藝術繪本 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) |
+| 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步及由建立者手動結束房間 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) |
 
 「花花世界」的功能、Firebase 建置、資料庫安全規則、測試和發佈方式，請參閱[繪本使用與設定指南](./MURAKAMI.md)。
 
