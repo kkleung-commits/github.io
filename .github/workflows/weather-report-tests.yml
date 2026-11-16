@@ -1,0 +1,37 @@
+name: Test weather report
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'weather-report/**'
+      - '.github/workflows/weather-report-tests.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'weather-report/**'
+      - '.github/workflows/weather-report-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: weather-report
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install test dependencies
+        run: npm install
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run tests
+        run: npm test

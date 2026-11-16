@@ -6,6 +6,7 @@
 |---|---|---|
 | 尋找開與關 | 以香港粵語為主的特教課室眼動互動遊戲 | [開啟遊戲](https://kkleung-commits.github.io/github.io/) |
 | 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步及由建立者手動結束房間 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) |
+| 天氣報告系統 | 學生以眼動儀、觸控或開關練習簡短天氣播報 | [開啟天氣報告](https://kkleung-commits.github.io/github.io/weather-report/) |
 
 「花花世界」的功能、Firebase 建置、資料庫安全規則、測試和發佈方式，請參閱[繪本使用與設定指南](./MURAKAMI.md)。
 

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天氣報告系統</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: "Microsoft JhengHei", "PingFang HK", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 24px;
+            background: #000;
+            color: #fff;
+            text-align: center;
+        }
+
+        #teacher-controls {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 3px solid #555;
+            border-radius: 12px;
+            background: #111;
+            font-size: clamp(14px, 1.8vw, 24px);
+        }
+
+        #time-selector {
+            padding: 5px 10px;
+            border: 2px solid #777;
+            border-radius: 8px;
+            background: #333;
+            color: #ff0;
+            font: inherit;
+        }
+
+        #header {
+            min-height: 3em;
+            margin: 8vh 0 4vh;
+            font-size: clamp(24px, 3.5vw, 60px);
+            line-height: 1.4;
+        }
+
+        #header.loading {
+            color: #0ff;
+        }
+
+        #update-time {
+            min-height: 1.5em;
+            margin: 0 0 3vh;
+            color: #ddd;
+            font-size: clamp(16px, 2vw, 28px);
+        }
+
+        .gaze-btn {
+            position: relative;
+            display: flex;
+            width: min(70vw, 900px);
+            height: min(55vh, 560px);
+            min-height: 240px;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 0;
+            border: 20px solid #ff0;
+            border-radius: 50px;
+            background: #00f;
+            color: #ff0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .gaze-btn:hover,
+        .gaze-btn:focus-visible,
+        .gaze-btn.active-click {
+            border-color: #fff;
+            background: #0000cd;
+            box-shadow: 0 0 40px rgb(255 255 0 / 55%);
+        }
+
+        .btn-text {
+            z-index: 1;
+            font-size: clamp(48px, 10vw, 150px);
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .fill-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: rgb(255 0 0 / 60%);
+        }
+
+        .fill-bar.active {
+            height: 100%;
+        }
+
+        #weather-icon {
+            display: none;
+            position: absolute;
+            z-index: 2;
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .gaze-btn.show-icon #weather-icon {
+            display: block;
+        }
+
+        .gaze-btn.show-icon .btn-text {
+            visibility: hidden;
+        }
+
+        #unlock-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            border: 0;
+            background: #001f3f;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #unlock-screen[hidden] {
+            display: none;
+        }
+
+        #unlock-screen h1 {
+            margin: 0 0 16px;
+            font-size: clamp(30px, 5vw, 80px);
+        }
+
+        #unlock-screen p {
+            color: #ffd700;
+            font-size: clamp(20px, 3vw, 42px);
+        }
+
+        @media (max-width: 600px) {
+            #teacher-controls {
+                top: 12px;
+                left: 12px;
+            }
+
+            .gaze-btn {
+                width: 90vw;
+                height: 45vh;
+                min-height: 200px;
+                border-width: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="teacher-controls">
+        <label for="time-selector">注視時間：</label>
+        <select id="time-selector">
+            <option value="1000">1 秒</option>
+            <option value="2000" selected>2 秒</option>
+            <option value="3000">3 秒</option>
+        </select>
+    </div>
+
+    <button id="unlock-screen" type="button">
+        <h1>老師請點擊螢幕解鎖</h1>
+        <p>建議每天早上約 8:30 使用</p>
+    </button>
+
+    <div id="header" aria-live="polite">請注視按鈕 2 秒<br>或點擊按鈕／拍打開關</div>
+    <div id="update-time" aria-live="polite">建議每天早上約 8:30 報告，資料以香港天文台更新時間為準。</div>
+
+    <button class="gaze-btn" id="btn-weather" type="button" aria-label="報告天氣">
+        <div class="fill-bar" id="fill-weather"></div>
+        <span class="btn-text">報告<br>天氣</span>
+        <img id="weather-icon" alt="">
+    </button>
+
+    <script>
+        const btnWeather = document.getElementById('btn-weather');
+        const fillWeather = document.getElementById('fill-weather');
+        const header = document.getElementById('header');
+        const updateTime = document.getElementById('update-time');
+        const weatherIcon = document.getElementById('weather-icon');
+        const unlockScreen = document.getElementById('unlock-screen');
+        const timeSelector = document.getElementById('time-selector');
+        const weatherApiUrl = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
+
+        let dwellTime = Number(timeSelector.value);
+        let dwellTimer = null;
+        let isUnlocked = false;
+        let isReporting = false;
+
+        const weatherDescriptions = {
+            50: '晴天',
+            51: '部分時間有陽光',
+            52: '部分時間有陽光',
+            53: '部分時間有陽光',
+            54: '部分時間有陽光',
+            60: '陰天',
+            61: '陰天',
+            62: '雨天',
+            63: '雨天',
+            64: '大雨',
+            65: '有雷暴',
+            70: '有驟雨',
+            71: '有驟雨',
+            72: '有雷暴及驟雨',
+            73: '有雷暴及驟雨',
+            74: '有雷暴及驟雨',
+            75: '有大驟雨',
+            76: '有薄霧',
+            77: '有霧',
+            80: '有驟雨',
+            81: '有大驟雨',
+            82: '有雷暴',
+            83: '有雷暴及驟雨',
+            84: '有雷暴及大驟雨',
+            85: '有全面驟雨',
+            90: '有驟雨',
+            91: '有大驟雨',
+            92: '有雷暴',
+            93: '有雷暴及大驟雨'
+        };
+
+        function resetInstructions() {
+            header.classList.remove('loading');
+            header.innerHTML = `請注視按鈕 ${dwellTime / 1000} 秒<br>或點擊按鈕／拍打開關`;
+        }
+
+        function formatHongKongTime(dateValue) {
+            const date = new Date(dateValue);
+            if (Number.isNaN(date.getTime())) {
+                throw new Error('香港天文台沒有提供有效的天氣更新時間');
+            }
+
+            const parts = new Intl.DateTimeFormat('zh-HK', {
+                timeZone: 'Asia/Hong_Kong',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            }).formatToParts(date);
+            const dayPeriod = parts.find(part => part.type === 'dayPeriod')?.value || '';
+            const hour = parts.find(part => part.type === 'hour')?.value || '';
+            const minute = parts.find(part => part.type === 'minute')?.value || '';
+            return `${dayPeriod}${hour}時${minute}分`;
+        }
+
+        function finishReport() {
+            isReporting = false;
+            btnWeather.classList.remove('show-icon', 'active-click');
+            resetInstructions();
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-HK';
+            utterance.rate = 0.85;
+            utterance.onend = finishReport;
+            utterance.onerror = finishReport;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function clearDwell() {
+            if (dwellTimer !== null) {
+                clearTimeout(dwellTimer);
+                dwellTimer = null;
+            }
+            fillWeather.style.transition = 'none';
+            fillWeather.classList.remove('active');
+        }
+
+        async function triggerReportAction() {
+            if (!isUnlocked || isReporting) return;
+
+            isReporting = true;
+            clearDwell();
+            btnWeather.classList.remove('active-click');
+            btnWeather.classList.remove('show-icon');
+            header.classList.add('loading');
+            header.textContent = '正在讀取香港天文台天氣…';
+            updateTime.textContent = '';
+
+            let reportText;
+            let description;
+            let timeLabel;
+            let iconIndex;
+            try {
+                const response = await fetch(weatherApiUrl, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`香港天文台天氣服務回應錯誤：${response.status}`);
+                }
+
+                const data = await response.json();
+                iconIndex = Number(data.icon?.[0]);
+                description = weatherDescriptions[iconIndex];
+                const observedAt = data.iconUpdateTime || data.updateTime;
+                if (!description || !observedAt) {
+                    throw new Error('香港天文台天氣資料不完整或圖示未能辨認');
+                }
+
+                timeLabel = formatHongKongTime(observedAt);
+                reportText = `天氣報告：${description}。香港天文台資料更新時間：${timeLabel}。`;
+            } catch (error) {
+                header.classList.remove('loading');
+                header.textContent = '暫時未能取得天氣資料，請稍後再試。';
+                updateTime.textContent = '請檢查網絡連線。';
+                reportText = '暫時未能取得天氣資料，請稍後再試。';
+                console.error('讀取香港天文台天氣失敗：', error);
+            }
+
+            if (description) {
+                header.classList.remove('loading');
+                header.textContent = `天氣：${description}`;
+                updateTime.textContent = `香港天文台資料更新時間：${timeLabel}`;
+                weatherIcon.src = `https://www.weather.gov.hk/images/wxicon/pic${iconIndex}.png`;
+                weatherIcon.alt = description;
+                btnWeather.classList.add('show-icon');
+            }
+            speak(reportText);
+        }
+
+        timeSelector.addEventListener('change', event => {
+            dwellTime = Number(event.target.value);
+            if (!isReporting) resetInstructions();
+        });
+
+        unlockScreen.addEventListener('click', () => {
+            if (isUnlocked) return;
+            isUnlocked = true;
+            unlockScreen.hidden = true;
+            window.speechSynthesis.cancel();
+            const unlockUtterance = new SpeechSynthesisUtterance('系統已準備好');
+            unlockUtterance.volume = 0.05;
+            window.speechSynthesis.speak(unlockUtterance);
+            btnWeather.focus();
+        });
+
+        btnWeather.addEventListener('mouseenter', () => {
+            if (!isUnlocked || isReporting) return;
+            clearDwell();
+            header.textContent = '鎖定中…';
+            fillWeather.style.transition = `height ${dwellTime}ms linear`;
+            fillWeather.classList.add('active');
+            dwellTimer = setTimeout(triggerReportAction, dwellTime);
+        });
+
+        btnWeather.addEventListener('mouseleave', () => {
+            clearDwell();
+            if (!isReporting) resetInstructions();
+        });
+
+        btnWeather.addEventListener('click', () => {
+            if (!isUnlocked || isReporting) return;
+            btnWeather.classList.add('active-click');
+            triggerReportAction();
+        });
+    </script>
+</body>
+</html>
