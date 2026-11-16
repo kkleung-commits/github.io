@@ -9,8 +9,8 @@ const testVoices = [{
   default: true
 }];
 
-async function preparePage(page) {
-  await page.clock.setFixedTime(new Date('2026-11-16T08:30:00+08:00'));
+async function preparePage(page, { studentName = '小明', time = '2026-11-16T08:30:00+08:00' } = {}) {
+  await page.clock.setFixedTime(new Date(time));
   await page.addInitScript(availableVoices => {
     const speechSynthesis = {
       cancel() {},
@@ -36,7 +36,7 @@ async function preparePage(page) {
   }, testVoices);
   await page.goto(pageUrl);
   await page.locator('#unlock-screen').click();
-  await page.locator('#student-name').fill('小明');
+  if (studentName) await page.locator('#student-name').fill(studentName);
 }
 
 function mockWeather(page, { icon = 50, updateTime = '2026-11-16T08:20:00+08:00' } = {}) {
@@ -61,7 +61,7 @@ test('reports playful weather with the student name and displays today date and 
   await expect(page.locator('#update-time')).toContainText('2026年11月16日（今天）');
   await expect(page.locator('#update-time')).toContainText('8時20分');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('我是小明同學。太陽公公笑哈哈，今天是晴天呀！');
+    .toBe('早晨，小明。太陽公公笑哈哈，今天是晴天呀！');
   await expect(page.locator('#update-time')).not.toContainText('我是');
 });
 
@@ -78,17 +78,25 @@ test('does not report weather when HKO data is not from today', async ({ page })
   await expect(page.locator('#weather-icon')).not.toBeVisible();
 });
 
-test('requires a student name before starting the report', async ({ page }) => {
+test('allows an empty name and uses the afternoon greeting', async ({ page }) => {
   await mockWeather(page);
-  await preparePage(page);
-  await page.locator('#student-name').fill('  ');
+  await preparePage(page, { studentName: '', time: '2026-11-16T13:30:00+08:00' });
 
   await page.locator('#btn-weather').click();
 
-  await expect(page.locator('#header')).toHaveText('請老師先輸入報告同學姓名。');
-  await expect(page.locator('#update-time')).toHaveText(/只播報今天的資料/);
+  await expect(page.locator('#header')).toHaveText('天氣：晴天');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('系統已準備好');
+    .toBe('午安。太陽公公笑哈哈，今天是晴天呀！');
+});
+
+test('uses the evening greeting and says a provided name without a title', async ({ page }) => {
+  await mockWeather(page);
+  await preparePage(page, { studentName: '小美', time: '2026-11-16T20:30:00+08:00' });
+
+  await page.locator('#btn-weather').click();
+
+  await expect.poll(() => page.evaluate(() => window.lastSpokenText))
+    .toBe('晚安，小美。太陽公公笑哈哈，今天是晴天呀！');
 });
 
 test('uses the selected weather voice for the named report', async ({ page }) => {
@@ -101,7 +109,7 @@ test('uses the selected weather voice for the named report', async ({ page }) =>
   await expect.poll(() => page.evaluate(() => window.lastVoiceName))
     .toBe('Microsoft WanLung Online');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('我是小明同學。太陽同白雲玩捉迷藏，部分時間有陽光呀！');
+    .toBe('早晨，小明。太陽同白雲玩捉迷藏，部分時間有陽光呀！');
 });
 
 for (const { icon, description, line } of [
@@ -125,7 +133,7 @@ for (const { icon, description, line } of [
 
     await expect(page.locator('#header')).toHaveText(`天氣：${description}`);
     await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-      .toBe(`我是小明同學。${line}`);
+      .toBe(`早晨，小明。${line}`);
   });
 }
 

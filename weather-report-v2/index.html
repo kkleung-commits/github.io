@@ -304,8 +304,8 @@
             <option value="male">男聲</option>
         </select>
         <button id="voice-preview" type="button">試聽語音</button>
-        <label for="student-name">報告同學姓名（必填）：</label>
-        <input id="student-name" type="text" maxlength="20" autocomplete="off" placeholder="請老師輸入姓名" aria-required="true" required>
+        <label for="student-name">報告同學姓名（選填）：</label>
+        <input id="student-name" type="text" maxlength="20" autocomplete="off" placeholder="可留空">
         <span id="voice-status" role="status" aria-live="polite">正在檢查裝置語音…</span>
     </div>
 
@@ -490,6 +490,17 @@
             };
         }
 
+        function getHongKongGreeting() {
+            const hour = Number(new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Hong_Kong',
+                hour: '2-digit',
+                hourCycle: 'h23'
+            }).format(new Date()));
+            if (hour >= 5 && hour < 12) return '早晨';
+            if (hour >= 12 && hour < 18) return '午安';
+            return '晚安';
+        }
+
         function resetInstructions() {
             header.classList.remove('loading', 'warning');
             header.textContent = `請注視大按鈕 ${dwellTime / 1000} 秒，或點擊／使用開關`;
@@ -513,11 +524,6 @@
             if (!isUnlocked || isReporting) return;
 
             const studentName = studentNameInput.value.trim().replace(/\s+/g, ' ');
-            if (!studentName) {
-                header.classList.remove('loading');
-                header.textContent = '請老師先輸入報告同學姓名。';
-                return;
-            }
 
             isReporting = true;
             clearDwell();
@@ -557,7 +563,9 @@
                 weatherIcon.src = `https://www.weather.gov.hk/images/wxicon/pic${iconIndex}.png`;
                 weatherIcon.alt = report.description;
                 btnWeather.classList.add('show-icon');
-                speak(`我是${studentName}同學。${report.line}`);
+                const greeting = getHongKongGreeting();
+                const introduction = studentName ? `${greeting}，${studentName}。` : `${greeting}。`;
+                speak(`${introduction}${report.line}`);
             } catch (error) {
                 header.classList.remove('loading');
                 header.textContent = '暫時未能取得天氣資料，請稍後再試。';
