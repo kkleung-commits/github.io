@@ -18,21 +18,23 @@ const testVoices = [
   }
 ];
 
-async function preparePage(page, voices = testVoices) {
-  await page.addInitScript(availableVoices => {
+async function preparePage(page, voices = testVoices, supportsVoiceEvents = true) {
+  await page.addInitScript((availableVoices, supportsEvents) => {
+    const speechSynthesis = {
+      cancel() {},
+      getVoices() {
+        return availableVoices;
+      },
+      speak(utterance) {
+        window.lastSpokenText = utterance.text;
+        window.lastVoiceName = utterance.voice?.name || '';
+      }
+    };
+    if (supportsEvents) speechSynthesis.addEventListener = () => {};
+
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
-      value: {
-        cancel() {},
-        getVoices() {
-          return availableVoices;
-        },
-        addEventListener() {},
-        speak(utterance) {
-          window.lastSpokenText = utterance.text;
-          window.lastVoiceName = utterance.voice?.name || '';
-        }
-      }
+      value: speechSynthesis
     });
     window.SpeechSynthesisUtterance = class {
       constructor(text) {
@@ -40,7 +42,7 @@ async function preparePage(page, voices = testVoices) {
         this.voice = null;
       }
     };
-  }, voices);
+  }, voices, supportsVoiceEvents);
   await page.goto(pageUrl);
   await page.locator('#unlock-screen').click();
 }
@@ -162,4 +164,12 @@ test('explains when the preferred gendered voice is unavailable', async ({ page 
 
   await expect(page.locator('#voice-status'))
     .toContainText('未找到可辨認的女聲粵語語音');
+});
+
+test('loads voice settings when voiceschanged listeners are unavailable', async ({ page }) => {
+  await preparePage(page, testVoices, false);
+
+  await page.locator('#voice-selector').selectOption('female');
+
+  await expect(page.locator('#voice-status')).toContainText('Microsoft HiuMaan Online');
 });

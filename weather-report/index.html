@@ -477,13 +477,18 @@
 
         voiceSelector.addEventListener('change', updateVoiceStatus);
         voicePreview.addEventListener('click', previewVoice);
-        window.speechSynthesis.addEventListener('voiceschanged', updateVoiceStatus);
+        if (typeof window.speechSynthesis.addEventListener === 'function') {
+            window.speechSynthesis.addEventListener('voiceschanged', updateVoiceStatus);
+        } else {
+            window.speechSynthesis.onvoiceschanged = updateVoiceStatus;
+        }
         updateVoiceStatus();
 
         unlockScreen.addEventListener('click', () => {
             if (isUnlocked) return;
             isUnlocked = true;
             unlockScreen.hidden = true;
+            updateVoiceStatus();
             window.speechSynthesis.cancel();
             const unlockUtterance = new SpeechSynthesisUtterance('系統已準備好');
             unlockUtterance.volume = 0.05;
