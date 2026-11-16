@@ -38,9 +38,11 @@
             top: 2vh;
             left: 2vw;
             z-index: 1;
-            display: flex;
+            display: grid;
+            grid-template-columns: auto minmax(72px, 0.6fr) auto minmax(110px, 1fr) auto;
             align-items: center;
-            gap: 12px;
+            gap: 8px 12px;
+            width: min(90vw, 760px);
             padding: 12px 16px;
             border: 3px solid #555;
             border-radius: 12px;
@@ -48,7 +50,10 @@
             font-size: clamp(14px, 1.8vw, 24px);
         }
 
-        #time-selector {
+        #time-selector,
+        #voice-selector {
+            width: 100%;
+            min-width: 0;
             padding: 5px 10px;
             border: 2px solid #777;
             border-radius: 8px;
@@ -57,9 +62,34 @@
             font: inherit;
         }
 
+        #voice-preview {
+            padding: 6px 12px;
+            border: 2px solid #777;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        #voice-preview:focus-visible,
+        #time-selector:focus-visible,
+        #voice-selector:focus-visible {
+            outline: 3px solid #ff0;
+            outline-offset: 2px;
+        }
+
+        #voice-status {
+            grid-column: 1 / -1;
+            max-width: 100%;
+            color: #ddd;
+            font-size: clamp(12px, 1.2vw, 16px);
+            text-align: left;
+        }
+
         #header {
             min-height: 3em;
-            margin: 8vh 0 4vh;
+            margin: 14vh 0 2vh;
             font-size: clamp(24px, 3.5vw, 60px);
             line-height: 1.4;
         }
@@ -172,6 +202,17 @@
             #teacher-controls {
                 top: 12px;
                 left: 12px;
+                width: calc(100vw - 24px);
+                grid-template-columns: auto minmax(0, 1fr);
+            }
+
+            #voice-preview {
+                grid-column: 2;
+                justify-self: start;
+            }
+
+            #header {
+                margin-top: 21vh;
             }
 
             .gaze-btn {
@@ -191,6 +232,14 @@
             <option value="2000" selected>2 秒</option>
             <option value="3000">3 秒</option>
         </select>
+        <label for="voice-selector">語音偏好：</label>
+        <select id="voice-selector">
+            <option value="default">裝置預設</option>
+            <option value="female">女聲</option>
+            <option value="male">男聲</option>
+        </select>
+        <button id="voice-preview" type="button">試聽語音</button>
+        <span id="voice-status" role="status" aria-live="polite">正在檢查裝置語音…</span>
     </div>
 
     <button id="unlock-screen" type="button">
@@ -215,6 +264,9 @@
         const weatherIcon = document.getElementById('weather-icon');
         const unlockScreen = document.getElementById('unlock-screen');
         const timeSelector = document.getElementById('time-selector');
+        const voiceSelector = document.getElementById('voice-selector');
+        const voicePreview = document.getElementById('voice-preview');
+        const voiceStatus = document.getElementById('voice-status');
         const weatherApiUrl = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
 
         let dwellTime = Number(timeSelector.value);
@@ -254,6 +306,70 @@
             93: '有雷暴及大驟雨'
         };
 
+        function getCantoneseVoices() {
+            if (typeof window.speechSynthesis.getVoices !== 'function') return [];
+            return window.speechSynthesis.getVoices().filter(voice => {
+                const lang = (voice.lang || '').replace('_', '-').toLowerCase();
+                return lang.startsWith('yue') || (lang.startsWith('zh') && lang.includes('hk'));
+            });
+        }
+
+        function getVoiceGender(voice) {
+            const label = `${voice.name} ${voice.voiceURI}`;
+            const normalized = label.toLowerCase().replace(/[\s_-]+/g, '');
+            if (
+                /\b(female|woman|girl)\b|女性|女聲/i.test(label)
+                || normalized.includes('hiumaan')
+                || normalized.includes('tracy')
+            ) {
+                return 'female';
+            }
+            if (
+                /\b(male|man|boy)\b|男性|男聲/i.test(label)
+                || normalized.includes('wanlung')
+                || normalized.includes('danny')
+            ) {
+                return 'male';
+            }
+            return null;
+        }
+
+        function getSelectedVoice() {
+            const voices = getCantoneseVoices();
+            const preference = voiceSelector.value;
+            const preferredVoice = preference === 'default'
+                ? null
+                : voices.find(voice => getVoiceGender(voice) === preference);
+            const voice = preferredVoice || voices.find(item => item.default) || voices[0] || null;
+
+            if (preference !== 'default' && !preferredVoice) {
+                const gender = preference === 'female' ? '女' : '男';
+                const fallback = voice ? `改用「${voice.name}」` : '改用瀏覽器預設語音';
+                voiceStatus.textContent = `未找到可辨認的${gender}聲粵語語音，${fallback}。`;
+            } else if (voice) {
+                voiceStatus.textContent = `目前語音：${voice.name}`;
+            } else {
+                voiceStatus.textContent = '此裝置未提供粵語語音，將使用瀏覽器預設語音。';
+            }
+
+            return voice;
+        }
+
+        function updateVoiceStatus() {
+            getSelectedVoice();
+        }
+
+        function previewVoice() {
+            if (!isUnlocked || isReporting) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance('天氣報告：晴天。部分時間有陽光。');
+            const voice = getSelectedVoice();
+            if (voice) utterance.voice = voice;
+            utterance.lang = voice?.lang || 'zh-HK';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+
         function resetInstructions() {
             header.classList.remove('loading');
             header.innerHTML = `請注視按鈕 ${dwellTime / 1000} 秒<br>或點擊按鈕／拍打開關`;
@@ -286,7 +402,9 @@
         function speak(text) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-HK';
+            const voice = getSelectedVoice();
+            if (voice) utterance.voice = voice;
+            utterance.lang = voice?.lang || 'zh-HK';
             utterance.rate = 0.85;
             utterance.onend = finishReport;
             utterance.onerror = finishReport;
@@ -332,7 +450,7 @@
                 }
 
                 timeLabel = formatHongKongTime(observedAt);
-                reportText = `天氣報告：${description}。香港天文台資料更新時間：${timeLabel}。`;
+                reportText = `天氣報告：${description}。`;
             } catch (error) {
                 header.classList.remove('loading');
                 header.textContent = '暫時未能取得天氣資料，請稍後再試。';
@@ -356,6 +474,11 @@
             dwellTime = Number(event.target.value);
             if (!isReporting) resetInstructions();
         });
+
+        voiceSelector.addEventListener('change', updateVoiceStatus);
+        voicePreview.addEventListener('click', previewVoice);
+        window.speechSynthesis.addEventListener('voiceschanged', updateVoiceStatus);
+        updateVoiceStatus();
 
         unlockScreen.addEventListener('click', () => {
             if (isUnlocked) return;
