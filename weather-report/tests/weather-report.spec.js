@@ -19,7 +19,7 @@ const testVoices = [
 ];
 
 async function preparePage(page, voices = testVoices, supportsVoiceEvents = true) {
-  await page.addInitScript((availableVoices, supportsEvents) => {
+  await page.addInitScript(({ availableVoices, supportsEvents }) => {
     const speechSynthesis = {
       cancel() {},
       getVoices() {
@@ -42,7 +42,7 @@ async function preparePage(page, voices = testVoices, supportsVoiceEvents = true
         this.voice = null;
       }
     };
-  }, voices, supportsVoiceEvents);
+  }, { availableVoices: voices, supportsEvents: supportsVoiceEvents });
   await page.goto(pageUrl);
   await page.locator('#unlock-screen').click();
 }
