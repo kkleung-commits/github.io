@@ -130,7 +130,7 @@ test('uses the teacher-selected local weather without requesting HKO data', asyn
   await expect(page.locator('#header')).toHaveText('天氣：陰天（老師選擇）');
   await expect(page.locator('#update-time')).toHaveText('老師已手動選擇天氣，不使用天文台資料。');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('早晨，小明。今日陰天，好多雲呀！');
+    .toBe('早晨，小明。今日係陰天，d雲遮住咗太陽，冇陽光。');
   expect(weatherRequests).toBe(0);
 });
 
@@ -179,7 +179,8 @@ test('uses the selected weather voice for the named report', async ({ page }) =>
 });
 
 for (const { icon, description, line } of [
-  { icon: 60, description: '陰天', line: '今日陰天，好多雲呀！' },
+  { icon: 60, description: '陰天', line: '今日係陰天，d雲遮住咗太陽，冇陽光。' },
+  { icon: 61, description: '陰天', line: '今日係陰天，d雲遮住咗太陽，冇陽光。' },
   { icon: 62, description: '雨天', line: '今日落雨，記得帶遮呀！' },
   { icon: 64, description: '大雨', line: '今日落大雨，出門要小心呀！' },
   { icon: 65, description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
@@ -191,7 +192,7 @@ for (const { icon, description, line } of [
   { icon: 84, description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' },
   { icon: 85, description: '有全面驟雨', line: '今日好多地方有驟雨，記得帶遮呀！' }
 ]) {
-  test(`uses a short, clear report for ${description}`, async ({ page }) => {
+  test(`uses a short, clear report for ${description} (icon ${icon})`, async ({ page }) => {
     await mockWeather(page, { icon });
     await preparePage(page);
 

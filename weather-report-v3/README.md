@@ -9,7 +9,7 @@
 - 加大「報告天氣」眼動目標，縮小天氣狀態和時間的顯示區域；支援凝視 1、2 或 3 秒、直接點擊及開關操作。
 - 老師設定按注視、語音、姓名和本區天氣分組；天氣狀況預設跟隨天文台，亦可手動選擇本區天氣。
 - 報告同學姓名可留空。播報會按香港時間先說「早晨」、「午安」或「晚安」；有填姓名時再直呼姓名（不加「同學」），然後按天氣圖示報告。問候時段為 05:00–11:59「早晨」、12:00–17:59「午安」，其餘時間「晚安」。
-- 天氣播報使用簡短、直接的香港廣東話，例如「今日天晴，太陽伯伯出來喇！」和「今日陰天，好多雲呀！」；大雨、雷暴、驟雨和霧等亦會用簡單說法清楚提醒。
+- 天氣播報使用簡短、直接的香港廣東話，例如「今日天晴，太陽伯伯出來喇！」和「今日係陰天，d雲遮住咗太陽，冇陽光。」；大雨、雷暴、驟雨和霧等亦會用簡單說法清楚提醒。
 - 跟隨天文台時顯示香港時間的圖示更新日期和時間，並以圖示專屬更新時間判斷是否為今天；若不是今天，會提醒老師核對並暫停天文台播報。
 - 老師可選裝置預設、男聲或女聲偏好，並試聽。語音由學生裝置提供，可能因裝置而異。
 - 姓名只在本機瀏覽器中用於語音，不會送往香港天文台或記錄到伺服器。
@@ -48,8 +48,8 @@ winget install --id OpenJS.NodeJS.22 --exact
 
 ## 版本及發佈
 
-- 版本：3.0.1
-- 最新版本標籤：[weather-report-v3.0.1](https://github.com/kkleung-commits/github.io/tree/weather-report-v3.0.1)
+- 版本：3.0.2
+- 最新版本標籤：[weather-report-v3.0.2](https://github.com/kkleung-commits/github.io/tree/weather-report-v3.0.2)
 - 版本記錄：[CHANGELOG.md](./CHANGELOG.md)
 - GitHub Pages 網址：[天氣報告系統 3.0](https://kkleung-commits.github.io/github.io/weather-report-v3/)
 - V2 仍在 [`weather-report-v2/`](../weather-report-v2/)；1.x 仍在 [`weather-report/`](../weather-report/)。
@@ -57,12 +57,12 @@ winget install --id OpenJS.NodeJS.22 --exact
 
 ## 接手與現場測試
 
-本機使用 Node.js 22.23.5 執行 `npm test`，25 項 Playwright 測試全數通過。V2、V3 會由[共用 GitHub Actions 工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)自動測試；自動測試使用模擬語音和天氣資料，不依賴即時天氣 API 或指定語音裝置。**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
+本機使用 Node.js 22.23.5 執行 `npm test`，26 項 Playwright 測試全數通過。V2、V3 會由[共用 GitHub Actions 工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)自動測試；自動測試使用模擬語音和天氣資料，不依賴即時天氣 API 或指定語音裝置。**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
 
 在另一台公司電腦接續時：
 
 1. 在 VS Code 開啟或複製 `kkleung-commits/github.io` repository，切換至 `main` 並執行 `git pull origin main`。
-2. 讓 AI 先閱讀本 README 和[版本記錄](./CHANGELOG.md)，再說：「請由天氣報告系統 3.0.1 接手，先確認手動天氣選擇和自動測試；保留 `weather-report-v2/` 及 `weather-report/` 舊版，未確認前不要改動。」
+2. 讓 AI 先閱讀本 README 和[版本記錄](./CHANGELOG.md)，再說：「請由天氣報告系統 3.0.2 接手，先確認手動天氣選擇和自動測試；保留 `weather-report-v2/` 及 `weather-report/` 舊版，未確認前不要改動。」
 
 現場建議依次確認：
 
@@ -77,12 +77,12 @@ winget install --id OpenJS.NodeJS.22 --exact
 
 ## 回復至上一個版本
 
-若 3.0.1 更新發現問題，可回復至 3.0.0；V3 頁面仍會保留，只有 3.0.1 的設定介面和文件更新會被還原。V2 與 1.x 頁面不受影響，也不會改寫 Git 歷史：
+若 3.0.2 更新發現問題，可回復至 3.0.1；V3 頁面仍會保留，只會還原 3.0.2 的陰天播報句子。V2 與 1.x 頁面不受影響，也不會改寫 Git 歷史：
 
 ```powershell
 git switch main
 git pull origin main
-$releaseCommit = git rev-list -n 1 weather-report-v3.0.1
+$releaseCommit = git rev-list -n 1 weather-report-v3.0.2
 git revert --no-edit $releaseCommit
 git push origin main
 ```

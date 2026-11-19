@@ -93,9 +93,9 @@ npm test
 |---|---|---|---|
 | 1.x | `weather-report/` | 9 項通過 | [V1 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-tests.yml) |
 | 2.0.2 | `weather-report-v2/` | 22 項通過 | 與 V3 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
-| 3.0.1 | `weather-report-v3/` | 25 項通過 | 與 V2 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
+| 3.0.2 | `weather-report-v3/` | 26 項通過 | 與 V2 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
 
-2026-11-19 本機驗證結果：V1、V2、V3 的 9、22、25 項 Playwright 測試均通過。每次推送 V2 或 V3 變更時，都會觸發[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)。
+2026-11-19 本機驗證結果：V1、V2、V3 的 9、22、26 項 Playwright 測試均通過。每次推送 V2 或 V3 變更時，都會觸發[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)。
 
 各版本的安裝與使用說明：
 
