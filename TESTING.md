@@ -77,3 +77,28 @@
 - 在 GitHub Pages 部署後，以 iPad Safari 開啟首頁並完成完整操作測試
 - 規劃 Tobii 眼動儀實際串接方案
 - 擴充多個教學場景及可依課堂匯出的匿名統計報表
+
+## 天氣報告系統自動測試
+
+三個天氣報告版本各自維持獨立的頁面、測試和版本記錄。Playwright 測試使用模擬天氣 API 與語音，不會呼叫即時天氣服務，也不代表已在實際眼動儀或學生裝置完成驗收。需要 Node.js 22 或更新版本；在 repository 根目錄執行以下指令，並按需要把專案目錄改為 `weather-report` 或 `weather-report-v2`：
+
+```powershell
+Set-Location weather-report-v3
+npm install
+npx playwright install chromium
+npm test
+```
+
+| 版本 | 專案目錄 | 最近本機測試 | GitHub Actions |
+|---|---|---|---|
+| 1.x | `weather-report/` | 9 項通過 | [V1 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-tests.yml) |
+| 2.0.2 | `weather-report-v2/` | 22 項通過 | 與 V3 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
+| 3.0.1 | `weather-report-v3/` | 25 項通過 | 與 V2 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
+
+2026-11-19 本機驗證結果：V1、V2、V3 的 9、22、25 項 Playwright 測試均通過。每次推送 V2 或 V3 變更時，都會觸發[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)。
+
+各版本的安裝與使用說明：
+
+- [天氣報告 V3](./weather-report-v3/README.md)
+- [天氣報告 V2](./weather-report-v2/README.md)
+- [天氣報告 1.x](./weather-report/README.md)

@@ -2,15 +2,17 @@
 
 本 repository 收錄互動教學原型，使用者可透過 GitHub Pages 體驗：
 
-| 作品 | 說明 | 網頁 |
-|---|---|---|
-| 尋找開與關 | 以香港粵語為主的特教課室眼動互動遊戲 | [開啟遊戲](https://kkleung-commits.github.io/github.io/) |
-| 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步及由建立者手動結束房間 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) |
-| 天氣報告系統 3.0.0 | 大型眼動按鈕、老師可手動選擇本區天氣、簡短廣東話播報 | [試用新版](https://kkleung-commits.github.io/github.io/weather-report-v3/) |
-| 天氣報告系統 2.0.2 | 上一版天氣報告系統，仍可使用 | [開啟 V2](https://kkleung-commits.github.io/github.io/weather-report-v2/) |
-| 天氣報告系統 1.x | 學生以眼動儀、觸控或開關練習簡短天氣播報 | [開啟舊版](https://kkleung-commits.github.io/github.io/weather-report/) |
+| 作品 | 說明 | 網頁 | 使用指南／版本記錄 |
+|---|---|---|---|
+| 尋找開與關 | 以香港粵語為主的特教課室眼動互動遊戲 | [開啟遊戲](https://kkleung-commits.github.io/github.io/) | — |
+| 花花世界 | 可翻頁、朗讀、填色、種花，並支援 Firebase 房間同步及由建立者手動結束房間 | [開啟繪本](https://kkleung-commits.github.io/github.io/murakami.html) | [專案指南](./MURAKAMI.md) |
+| 天氣報告系統 3.0.1 | 老師可手動選擇本區天氣，並以簡短廣東話播報 | [試用新版](https://kkleung-commits.github.io/github.io/weather-report-v3/) | [使用指南](./weather-report-v3/README.md) · [版本記錄](./weather-report-v3/CHANGELOG.md) |
+| 天氣報告系統 2.0.2 | 上一版天氣報告系統，仍可使用 | [開啟 V2](https://kkleung-commits.github.io/github.io/weather-report-v2/) | [使用指南](./weather-report-v2/README.md) · [版本記錄](./weather-report-v2/CHANGELOG.md) |
+| 天氣報告系統 1.x | 學生以眼動儀、觸控或開關練習簡短天氣播報 | [開啟舊版](https://kkleung-commits.github.io/github.io/weather-report/) | [使用指南](./weather-report/README.md) · [版本記錄](./weather-report/CHANGELOG.md) |
 
 「花花世界」的功能、Firebase 建置、資料庫安全規則、測試和發佈方式，請參閱[繪本使用與設定指南](./MURAKAMI.md)。
+
+各天氣報告版本都有獨立頁面和版本記錄；V3 的老師選單操作見[使用指南](./weather-report-v3/README.md#頁面與老師選單)，自動測試總覽見[測試紀錄](./TESTING.md)。
 
 ## 在 VS Code 更新後繼續「花花世界」
 

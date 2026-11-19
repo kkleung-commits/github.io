@@ -46,7 +46,7 @@ winget install --id OpenJS.NodeJS.22 --exact
 
 ## 接手與現場測試
 
-目前最新版為 2.0.2。2026-11-19 在 Node.js 22.23.5 環境執行 `npm test`，22 項 Playwright 測試全數通過。該版本的 [GitHub Actions 執行](https://github.com/kkleung-commits/github.io/actions/runs/44448599606)在安裝瀏覽器系統套件時失敗，未執行測試；自動測試使用模擬語音和天氣資料，不依賴即時天氣 API 或指定語音裝置。**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
+目前最新版為 2.0.2。2026-11-19 在 Node.js 22.23.5 環境執行 `npm test`，22 項 Playwright 測試全數通過。較早的單獨 V2 工作流程曾因安裝系統套件失敗；之後的 [V2／V3 測試矩陣](https://github.com/kkleung-commits/github.io/actions/runs/44454218145)已成功完成。自動測試使用模擬語音和天氣資料，不依賴即時天氣 API 或指定語音裝置。**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
 
 在另一台公司電腦接續時：
 

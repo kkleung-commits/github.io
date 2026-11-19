@@ -134,6 +134,16 @@ test('uses the teacher-selected local weather without requesting HKO data', asyn
   expect(weatherRequests).toBe(0);
 });
 
+test('groups teacher settings and explains the local weather selection', async ({ page }) => {
+  await preparePage(page);
+
+  await expect(page.getByRole('region', { name: '老師設定' })).toBeVisible();
+  await expect(page.getByLabel('本區天氣（選填）：')).toHaveValue('');
+  await expect(page.locator('#weather-override')).toHaveAttribute('aria-describedby', 'weather-help');
+  await expect(page.locator('#weather-help'))
+    .toHaveText('保留「跟隨天文台」使用天文台資料；選擇本區天氣後，按報告即可按老師選項播報。');
+});
+
 test('allows an empty name and uses the afternoon greeting', async ({ page }) => {
   await mockWeather(page);
   await preparePage(page, { studentName: '', time: '2026-11-16T13:30:00+08:00' });
@@ -210,8 +220,22 @@ test('keeps the teacher settings clear of the main status on a mobile-sized scre
 
   const controls = await page.locator('#teacher-controls').boundingBox();
   const heading = await page.locator('#header').boundingBox();
+  const weatherSelector = await page.locator('#weather-override').boundingBox();
 
   expect(heading.y).toBeGreaterThanOrEqual(controls.y + controls.height);
+  expect(weatherSelector.x + weatherSelector.width).toBeLessThanOrEqual(390);
+});
+
+test('keeps the report button visible below settings on a compact mobile screen', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await preparePage(page);
+
+  const controls = await page.locator('#teacher-controls').boundingBox();
+  const heading = await page.locator('#header').boundingBox();
+  const button = await page.locator('#btn-weather').boundingBox();
+
+  expect(heading.y).toBeGreaterThanOrEqual(controls.y + controls.height);
+  expect(button.y + button.height).toBeLessThanOrEqual(568);
 });
 
 test('reports after the selected gaze duration', async ({ page }) => {
