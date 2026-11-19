@@ -25,12 +25,20 @@ npx playwright install chromium
 npm test
 ```
 
+Windows 可用以下指令安裝 Node.js 22：
+
+```powershell
+winget install --id OpenJS.NodeJS.22 --exact
+```
+
+安裝後若 `node` 或 `npm` 仍顯示找不到，請重新啟動 VS Code 並開啟新的終端機。
+
 自動測試使用模擬天氣資料和語音，不依賴即時天氣 API 或指定語音裝置。
 
 ## 版本及發佈
 
-- 版本：2.0.1
-- 最新版本標籤：[weather-report-v2.0.1](https://github.com/kkleung-commits/github.io/tree/weather-report-v2.0.1)
+- 版本：2.0.2
+- 最新版本標籤：[weather-report-v2.0.2](https://github.com/kkleung-commits/github.io/tree/weather-report-v2.0.2)
 - 版本記錄：[CHANGELOG.md](./CHANGELOG.md)
 - GitHub Pages 網址：[天氣報告系統 2.0](https://kkleung-commits.github.io/github.io/weather-report-v2/)
 - 舊版仍在 [`weather-report/`](../weather-report/)。
@@ -38,12 +46,12 @@ npm test
 
 ## 接手與現場測試
 
-目前最新版為 2.0.1；GitHub Actions 的 [20 項 Playwright 測試全數通過](https://github.com/kkleung-commits/github.io/actions/runs/43880626745)，也已確認 GitHub Pages 可讀取天文台即時資料。自動測試使用模擬語音和天氣資料，**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
+目前最新版為 2.0.2。2026-11-19 在 Node.js 22.23.5 環境執行 `npm test`，22 項 Playwright 測試全數通過。該版本的 [GitHub Actions 執行](https://github.com/kkleung-commits/github.io/actions/runs/44448599606)在安裝瀏覽器系統套件時失敗，未執行測試；自動測試使用模擬語音和天氣資料，不依賴即時天氣 API 或指定語音裝置。**尚未在實際眼動儀、學生裝置或禮堂藍牙音響上測試**。
 
 在另一台公司電腦接續時：
 
 1. 在 VS Code 開啟或複製 `kkleung-commits/github.io` repository，切換至 `main` 並執行 `git pull origin main`。
-2. 讓 AI 先閱讀本 README 和[版本記錄](./CHANGELOG.md)，再說：「請由天氣報告系統 2.0.1 接手，先按 README 完成現場眼動儀和禮堂藍牙音響測試；保留 `weather-report/` 舊版，未確認前不要改動。」
+2. 讓 AI 先閱讀本 README 和[版本記錄](./CHANGELOG.md)，再說：「請由天氣報告系統 2.0.2 接手，先按 README 完成現場眼動儀和禮堂藍牙音響測試；保留 `weather-report/` 舊版，未確認前不要改動。」
 
 現場建議依次確認：
 
@@ -55,6 +63,22 @@ npm test
 6. 測試時保持裝置供電、頁面在前景，並避免螢幕自動休眠。
 
 瀏覽器頁面不能自行選擇藍牙音響、檢查藍牙連線或調整系統／擴音器音量；這些需在裝置和音響設定中處理。不同裝置提供的粵語聲音亦可能不同。若現場試用後覺得老師不易辨認，可再考慮把「試聽語音」按鈕改名為「音響試播」或加入使用前提示。
+
+## 回復上一個版本
+
+若 2.0.2 發現問題，可將**天氣報告 2.0 子資料夾**還原至上一個正式版 2.0.1。以下指令會產生新的回復提交，不會改寫 Git 歷史，也不會影響 repository 內其他作品：
+
+```powershell
+git switch main
+git pull origin main
+git restore --source weather-report-v2.0.1 -- weather-report-v2
+git diff -- weather-report-v2
+git add weather-report-v2
+git commit -m "revert: restore weather report v2.0.1"
+git push origin main
+```
+
+請先檢查 `git diff`，確認只還原預期內容再提交。推送到 `main` 後，GitHub Pages 會重新發布；其他未來版本亦應更新此處的上一版標籤。
 
 ## 資料來源
 
