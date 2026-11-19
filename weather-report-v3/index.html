@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>天氣報告系統 3.0</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: "Microsoft JhengHei", "PingFang HK", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            overflow: hidden;
+            padding: 12px;
+            background: #000;
+            color: #fff;
+            text-align: center;
+        }
+
+        #teacher-controls {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            z-index: 3;
+            display: grid;
+            grid-template-columns: auto minmax(72px, 0.6fr) auto minmax(110px, 1fr) auto;
+            align-items: center;
+            gap: 7px 10px;
+            width: min(94vw, 1040px);
+            padding: 10px 12px;
+            transform: translateX(-50%);
+            border: 2px solid #555;
+            border-radius: 12px;
+            background: #111;
+            font-size: clamp(14px, 1.55vw, 20px);
+            text-align: left;
+        }
+
+        #time-selector,
+        #voice-selector,
+        #weather-override,
+        #student-name {
+            width: 100%;
+            min-width: 0;
+            min-height: 42px;
+            padding: 6px 9px;
+            border: 2px solid #777;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font: inherit;
+        }
+
+        #student-name {
+            grid-column: 2 / -1;
+        }
+
+        #voice-preview {
+            min-height: 42px;
+            padding: 6px 12px;
+            border: 2px solid #777;
+            border-radius: 8px;
+            background: #333;
+            color: #fff;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        #voice-status {
+            grid-column: 1 / -1;
+            max-width: 100%;
+            color: #ddd;
+            font-size: clamp(12px, 1.2vw, 16px);
+        }
+
+        #teacher-controls :focus-visible,
+        .gaze-btn:focus-visible,
+        #unlock-screen:focus-visible {
+            outline: 4px solid #ff0;
+            outline-offset: 3px;
+        }
+
+        #header {
+            width: min(94vw, 1100px);
+            min-height: 1.4em;
+            margin: clamp(120px, 17vh, 190px) 0 0;
+            color: #fff;
+            font-size: clamp(18px, 2.3vw, 30px);
+            font-weight: 700;
+            line-height: 1.35;
+        }
+
+        #header.loading {
+            color: #0ff;
+        }
+
+        #header.warning {
+            color: #ff0;
+        }
+
+        #update-time {
+            min-height: 1.4em;
+            margin: 3px 0 8px;
+            color: #ddd;
+            font-size: clamp(14px, 1.55vw, 20px);
+            line-height: 1.4;
+        }
+
+        .gaze-btn {
+            position: relative;
+            display: flex;
+            width: min(88vw, 1300px);
+            height: min(66vh, 760px);
+            min-height: 260px;
+            flex: 0 1 auto;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            padding: 0;
+            border: 20px solid #ff0;
+            border-radius: 48px;
+            background: #00f;
+            color: #ff0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .gaze-btn:hover,
+        .gaze-btn:focus-visible,
+        .gaze-btn.active-click {
+            border-color: #fff;
+            background: #0000cd;
+            box-shadow: 0 0 40px rgb(255 255 0 / 55%);
+        }
+
+        .btn-text {
+            z-index: 1;
+            font-size: clamp(58px, 11vw, 170px);
+            font-weight: bold;
+            line-height: 1.08;
+        }
+
+        .fill-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: rgb(255 0 0 / 60%);
+        }
+
+        .fill-bar.active {
+            height: 100%;
+        }
+
+        #weather-icon {
+            display: none;
+            position: absolute;
+            z-index: 2;
+            width: 58%;
+            height: 58%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .gaze-btn.show-icon #weather-icon {
+            display: block;
+        }
+
+        .gaze-btn.show-icon .btn-text {
+            visibility: hidden;
+        }
+
+        #unlock-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            border: 0;
+            background: #001f3f;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #unlock-screen[hidden] {
+            display: none;
+        }
+
+        #unlock-screen h1 {
+            margin: 0 0 16px;
+            font-size: clamp(30px, 5vw, 80px);
+        }
+
+        #unlock-screen p {
+            color: #ffd700;
+            font-size: clamp(20px, 3vw, 42px);
+        }
+
+        @media (max-width: 650px) {
+            #teacher-controls {
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 6px 8px;
+            }
+
+            #student-name {
+                grid-column: 2;
+            }
+
+            #voice-preview {
+                grid-column: 2;
+                justify-self: start;
+            }
+
+            #voice-status {
+                grid-column: 1 / -1;
+            }
+
+            #header {
+                margin-top: max(330px, 38vh);
+            }
+
+            .gaze-btn {
+                width: 92vw;
+                height: min(48vh, 440px);
+                min-height: 230px;
+                border-width: 12px;
+                border-radius: 32px;
+            }
+
+            .btn-text {
+                font-size: clamp(56px, 16vw, 100px);
+            }
+        }
+
+        @media (max-width: 650px) and (max-height: 680px) {
+            #teacher-controls {
+                gap: 3px 8px;
+                padding: 7px;
+                font-size: 14px;
+            }
+
+            #time-selector,
+            #voice-selector,
+            #weather-override,
+            #student-name,
+            #voice-preview {
+                min-height: 34px;
+                padding: 4px 7px;
+            }
+
+            #header {
+                margin-top: 255px;
+            }
+
+            .gaze-btn {
+                height: min(38vh, 230px);
+                min-height: 180px;
+            }
+        }
+
+        @media (max-height: 620px) and (min-width: 651px) {
+            #header {
+                margin-top: 108px;
+            }
+
+            .gaze-btn {
+                height: 58vh;
+                min-height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="teacher-controls" aria-label="老師設定">
+        <label for="time-selector">注視時間：</label>
+        <select id="time-selector">
+            <option value="1000">1 秒</option>
+            <option value="2000" selected>2 秒</option>
+            <option value="3000">3 秒</option>
+        </select>
+        <label for="voice-selector">語音偏好：</label>
+        <select id="voice-selector">
+            <option value="default">裝置預設</option>
+            <option value="female">女聲</option>
+            <option value="male">男聲</option>
+        </select>
+        <button id="voice-preview" type="button">試聽語音</button>
+        <label for="student-name">報告同學姓名（選填）：</label>
+        <input id="student-name" type="text" maxlength="20" autocomplete="off" placeholder="可留空">
+        <label for="weather-override">天氣狀況：</label>
+        <select id="weather-override">
+            <option value="">跟隨天文台（預設）</option>
+            <option value="50">晴天</option>
+            <option value="51">部分時間有陽光</option>
+            <option value="60">陰天</option>
+            <option value="62">雨天</option>
+            <option value="64">大雨</option>
+            <option value="70">驟雨</option>
+            <option value="75">大驟雨</option>
+            <option value="65">雷暴</option>
+            <option value="72">雷暴及驟雨</option>
+            <option value="84">雷暴及大驟雨</option>
+            <option value="76">薄霧</option>
+            <option value="77">有霧</option>
+            <option value="85">多區驟雨</option>
+        </select>
+        <span id="voice-status" role="status" aria-live="polite">正在檢查裝置語音…</span>
+    </div>
+
+    <button id="unlock-screen" type="button">
+        <h1>老師請點擊螢幕解鎖</h1>
+        <p>建議每天早上約 8:30 使用</p>
+    </button>
+
+    <div id="header" aria-live="polite">請注視大按鈕 2 秒，或點擊／使用開關</div>
+    <div id="update-time" aria-live="polite">天氣日期和更新時間會顯示在這裏；只播報今天的資料。</div>
+
+    <button class="gaze-btn" id="btn-weather" type="button" aria-label="報告天氣">
+        <div class="fill-bar" id="fill-weather"></div>
+        <span class="btn-text">報告<br>天氣</span>
+        <img id="weather-icon" alt="">
+    </button>
+
+    <script>
+        const btnWeather = document.getElementById('btn-weather');
+        const fillWeather = document.getElementById('fill-weather');
+        const header = document.getElementById('header');
+        const updateTime = document.getElementById('update-time');
+        const weatherIcon = document.getElementById('weather-icon');
+        const unlockScreen = document.getElementById('unlock-screen');
+        const timeSelector = document.getElementById('time-selector');
+        const voiceSelector = document.getElementById('voice-selector');
+        const voicePreview = document.getElementById('voice-preview');
+        const voiceStatus = document.getElementById('voice-status');
+        const studentNameInput = document.getElementById('student-name');
+        const weatherOverrideSelector = document.getElementById('weather-override');
+        const weatherApiUrl = 'https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=rhrread&lang=tc';
+
+        let dwellTime = Number(timeSelector.value);
+        let dwellTimer = null;
+        let isUnlocked = false;
+        let isReporting = false;
+
+        const weatherReports = {
+            50: { description: '晴天', line: '今日天晴，太陽伯伯出來喇！' },
+            51: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            52: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            53: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            54: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            60: { description: '陰天', line: '今日陰天，好多雲呀！' },
+            61: { description: '陰天', line: '今日陰天，好多雲呀！' },
+            62: { description: '雨天', line: '今日落雨，記得帶遮呀！' },
+            63: { description: '雨天', line: '今日落雨，記得帶遮呀！' },
+            64: { description: '大雨', line: '今日落大雨，出門要小心呀！' },
+            65: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            70: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            71: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            72: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            73: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            74: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            75: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            76: { description: '有薄霧', line: '今日有薄霧，遠處會睇得唔清楚。' },
+            77: { description: '有霧', line: '今日有霧，睇路要小心呀！' },
+            80: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            81: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            82: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            83: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            84: { description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' },
+            85: { description: '有全面驟雨', line: '今日好多地方有驟雨，記得帶遮呀！' },
+            90: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            91: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            92: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            93: { description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' }
+        };
+
+        function getCantoneseVoices() {
+            if (typeof window.speechSynthesis.getVoices !== 'function') return [];
+            return window.speechSynthesis.getVoices().filter(voice => {
+                const lang = (voice.lang || '').replace('_', '-').toLowerCase();
+                return lang.startsWith('yue') || (lang.startsWith('zh') && lang.includes('hk'));
+            });
+        }
+
+        function getVoiceGender(voice) {
+            const label = `${voice.name} ${voice.voiceURI}`;
+            const normalized = label.toLowerCase().replace(/[\s_-]+/g, '');
+            if (
+                /\b(female|woman|girl)\b|女性|女聲/i.test(label)
+                || normalized.includes('hiumaan')
+                || normalized.includes('tracy')
+            ) {
+                return 'female';
+            }
+            if (
+                /\b(male|man|boy)\b|男性|男聲/i.test(label)
+                || normalized.includes('wanlung')
+                || normalized.includes('danny')
+            ) {
+                return 'male';
+            }
+            return null;
+        }
+
+        function getSelectedVoice() {
+            const voices = getCantoneseVoices();
+            const preference = voiceSelector.value;
+            const preferredVoice = preference === 'default'
+                ? null
+                : voices.find(voice => getVoiceGender(voice) === preference);
+            const voice = preferredVoice || voices.find(item => item.default) || voices[0] || null;
+
+            if (preference !== 'default' && !preferredVoice) {
+                const gender = preference === 'female' ? '女' : '男';
+                const fallback = voice ? `改用「${voice.name}」` : '改用瀏覽器預設語音';
+                voiceStatus.textContent = `未找到可辨認的${gender}聲粵語語音，${fallback}。`;
+            } else if (voice) {
+                voiceStatus.textContent = `目前語音：${voice.name}`;
+            } else {
+                voiceStatus.textContent = '此裝置未提供粵語語音，將使用瀏覽器預設語音。';
+            }
+
+            return voice;
+        }
+
+        function updateVoiceStatus() {
+            getSelectedVoice();
+        }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voice = getSelectedVoice();
+            if (voice) utterance.voice = voice;
+            utterance.lang = voice?.lang || 'zh-HK';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.1;
+            utterance.onend = finishReport;
+            utterance.onerror = finishReport;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function previewVoice() {
+            if (!isUnlocked || isReporting) return;
+            speak('你好，我是天氣小主播。今天的天氣報告準備開始！');
+        }
+
+        function getHongKongDateParts(date) {
+            const parts = new Intl.DateTimeFormat('en', {
+                timeZone: 'Asia/Hong_Kong',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+            return Object.fromEntries(parts
+                .filter(part => ['year', 'month', 'day'].includes(part.type))
+                .map(part => [part.type, Number(part.value)]));
+        }
+
+        function formatHongKongDateTime(dateValue) {
+            const date = new Date(dateValue);
+            if (Number.isNaN(date.getTime())) {
+                throw new Error('香港天文台沒有提供有效的天氣更新時間');
+            }
+
+            const observedParts = getHongKongDateParts(date);
+            const todayParts = getHongKongDateParts(new Date());
+            const observedDay = Date.UTC(observedParts.year, observedParts.month - 1, observedParts.day);
+            const todayDay = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
+            const daysBeforeToday = Math.round((todayDay - observedDay) / 86400000);
+            const relativeDate = daysBeforeToday === 0
+                ? '今天'
+                : daysBeforeToday === 1
+                    ? '昨天'
+                    : '不是今天';
+            const dateLabel = `${observedParts.year}年${observedParts.month}月${observedParts.day}日（${relativeDate}）`;
+            const timeParts = new Intl.DateTimeFormat('zh-HK', {
+                timeZone: 'Asia/Hong_Kong',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            }).formatToParts(date);
+            const dayPeriod = timeParts.find(part => part.type === 'dayPeriod')?.value || '';
+            const hour = timeParts.find(part => part.type === 'hour')?.value || '';
+            const minute = timeParts.find(part => part.type === 'minute')?.value || '';
+
+            return {
+                isToday: daysBeforeToday === 0,
+                label: `${dateLabel} ${dayPeriod}${hour}時${minute}分`
+            };
+        }
+
+        function getHongKongGreeting() {
+            const hour = Number(new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Hong_Kong',
+                hour: '2-digit',
+                hourCycle: 'h23'
+            }).format(new Date()));
+            if (hour >= 5 && hour < 12) return '早晨';
+            if (hour >= 12 && hour < 18) return '午安';
+            return '晚安';
+        }
+
+        function resetInstructions() {
+            header.classList.remove('loading', 'warning');
+            header.textContent = `請注視大按鈕 ${dwellTime / 1000} 秒，或點擊／使用開關`;
+        }
+
+        function finishReport() {
+            isReporting = false;
+            btnWeather.classList.remove('show-icon', 'active-click');
+        }
+
+        function clearDwell() {
+            if (dwellTimer !== null) {
+                clearTimeout(dwellTimer);
+                dwellTimer = null;
+            }
+            fillWeather.style.transition = 'none';
+            fillWeather.classList.remove('active');
+        }
+
+        async function triggerReportAction() {
+            if (!isUnlocked || isReporting) return;
+
+            const studentName = studentNameInput.value.trim().replace(/\s+/g, ' ');
+
+            isReporting = true;
+            clearDwell();
+            btnWeather.classList.remove('active-click', 'show-icon');
+            header.classList.remove('warning');
+            header.classList.add('loading');
+            header.textContent = '正在讀取香港天文台天氣…';
+            updateTime.textContent = '';
+
+            try {
+                let iconIndex;
+                let report;
+
+                if (weatherOverrideSelector.value) {
+                    iconIndex = Number(weatherOverrideSelector.value);
+                    report = weatherReports[iconIndex];
+                    if (!report) {
+                        throw new Error('老師選擇的天氣狀況無法辨認');
+                    }
+
+                    updateTime.textContent = '老師已手動選擇天氣，不使用天文台資料。';
+                    header.classList.remove('loading');
+                    header.textContent = `天氣：${report.description}（老師選擇）`;
+                } else {
+                    const response = await fetch(weatherApiUrl, { cache: 'no-store' });
+                    if (!response.ok) {
+                        throw new Error(`香港天文台天氣服務回應錯誤：${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    iconIndex = Number(data.icon?.[0]);
+                    report = weatherReports[iconIndex];
+                    const observedAt = data.iconUpdateTime || data.updateTime;
+                    if (!report || !observedAt) {
+                        throw new Error('香港天文台天氣資料不完整或圖示未能辨認');
+                    }
+
+                    const update = formatHongKongDateTime(observedAt);
+                    updateTime.textContent = `天氣圖示更新時間：${update.label}`;
+                    header.classList.remove('loading');
+
+                    if (!update.isToday) {
+                        header.classList.add('warning');
+                        header.textContent = '注意：這不是今天的天氣資料，暫停播報，請老師先核對。';
+                        updateTime.textContent += '（暫停播報）';
+                        speak('注意，天氣資料不是今天更新的，請老師先核對，暫不報告天氣。');
+                        return;
+                    }
+
+                    header.textContent = `天氣：${report.description}`;
+                }
+
+                weatherIcon.src = `https://www.weather.gov.hk/images/wxicon/pic${iconIndex}.png`;
+                weatherIcon.alt = report.description;
+                btnWeather.classList.add('show-icon');
+                const greeting = getHongKongGreeting();
+                const introduction = studentName ? `${greeting}，${studentName}。` : `${greeting}。`;
+                speak(`${introduction}${report.line}`);
+            } catch (error) {
+                header.classList.remove('loading');
+                header.textContent = '暫時未能取得天氣資料，請稍後再試。';
+                updateTime.textContent = '請檢查網絡連線或稍後重試。';
+                console.error('讀取香港天文台天氣失敗：', error);
+                speak('暫時未能取得天氣資料，請稍後再試。');
+            }
+        }
+
+        timeSelector.addEventListener('change', event => {
+            dwellTime = Number(event.target.value);
+            if (!isReporting) resetInstructions();
+        });
+
+        voiceSelector.addEventListener('change', updateVoiceStatus);
+        voicePreview.addEventListener('click', previewVoice);
+        if (typeof window.speechSynthesis.addEventListener === 'function') {
+            window.speechSynthesis.addEventListener('voiceschanged', updateVoiceStatus);
+        } else {
+            window.speechSynthesis.onvoiceschanged = updateVoiceStatus;
+        }
+        updateVoiceStatus();
+
+        unlockScreen.addEventListener('click', () => {
+            if (isUnlocked) return;
+            isUnlocked = true;
+            unlockScreen.hidden = true;
+            updateVoiceStatus();
+            window.speechSynthesis.cancel();
+            const unlockUtterance = new SpeechSynthesisUtterance('系統已準備好');
+            unlockUtterance.volume = 0.05;
+            window.speechSynthesis.speak(unlockUtterance);
+            btnWeather.focus();
+        });
+
+        btnWeather.addEventListener('mouseenter', () => {
+            if (!isUnlocked || isReporting) return;
+            clearDwell();
+            header.textContent = '注視大按鈕即可開始報告…';
+            fillWeather.style.transition = `height ${dwellTime}ms linear`;
+            fillWeather.classList.add('active');
+            dwellTimer = setTimeout(triggerReportAction, dwellTime);
+        });
+
+        btnWeather.addEventListener('mouseleave', () => {
+            clearDwell();
+            if (!isReporting && !btnWeather.classList.contains('show-icon')) {
+                resetInstructions();
+            }
+        });
+
+        btnWeather.addEventListener('click', () => {
+            if (!isUnlocked || isReporting) return;
+            btnWeather.classList.add('active-click');
+            triggerReportAction();
+        });
+    </script>
+</body>
+</html>
