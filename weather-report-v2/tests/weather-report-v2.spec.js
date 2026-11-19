@@ -39,19 +39,23 @@ async function preparePage(page, { studentName = '小明', time = '2026-11-16T08
   if (studentName) await page.locator('#student-name').fill(studentName);
 }
 
-function mockWeather(page, { icon = 50, updateTime = '2026-11-16T08:20:00+08:00' } = {}) {
+function mockWeather(page, {
+  icon = 50,
+  updateTime = '2026-11-16T08:20:00+08:00',
+  iconUpdateTime = updateTime
+} = {}) {
   return page.route(weatherApi, route => route.fulfill({
     status: 200,
     contentType: 'application/json',
     body: JSON.stringify({
       icon: [icon],
       updateTime,
-      iconUpdateTime: updateTime
+      iconUpdateTime
     })
   }));
 }
 
-test('reports playful weather with the student name and displays today date and time', async ({ page }) => {
+test('reports clear weather with the student name and displays today date and time', async ({ page }) => {
   await mockWeather(page, { icon: 50 });
   await preparePage(page);
 
@@ -61,7 +65,7 @@ test('reports playful weather with the student name and displays today date and 
   await expect(page.locator('#update-time')).toContainText('2026年11月16日（今天）');
   await expect(page.locator('#update-time')).toContainText('8時20分');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('早晨，小明。太陽公公笑哈哈，今天是晴天呀！');
+    .toBe('早晨，小明。今日天晴，太陽伯伯出來喇！');
   await expect(page.locator('#update-time')).not.toContainText('我是');
 });
 
@@ -78,6 +82,35 @@ test('does not report weather when HKO data is not from today', async ({ page })
   await expect(page.locator('#weather-icon')).not.toBeVisible();
 });
 
+test('uses the weather icon update time instead of the overall update time', async ({ page }) => {
+  await mockWeather(page, {
+    updateTime: '2026-11-16T10:02:00+08:00',
+    iconUpdateTime: '2026-11-16T08:10:00+08:00'
+  });
+  await preparePage(page);
+
+  await page.locator('#btn-weather').click();
+
+  await expect(page.locator('#header')).toHaveText('天氣：晴天');
+  await expect(page.locator('#update-time')).toContainText('8時10分');
+  await expect(page.locator('#update-time')).not.toContainText('10時02分');
+});
+
+test('does not report a previous-day icon when the overall data is current', async ({ page }) => {
+  await mockWeather(page, {
+    updateTime: '2026-11-16T08:20:00+08:00',
+    iconUpdateTime: '2026-11-15T23:50:00+08:00'
+  });
+  await preparePage(page);
+
+  await page.locator('#btn-weather').click();
+
+  await expect(page.locator('#header')).toContainText('不是今天的天氣資料');
+  await expect(page.locator('#update-time')).toContainText('2026年11月15日（昨天）');
+  await expect.poll(() => page.evaluate(() => window.lastSpokenText))
+    .toBe('注意，天氣資料不是今天更新的，請老師先核對，暫不報告天氣。');
+});
+
 test('allows an empty name and uses the afternoon greeting', async ({ page }) => {
   await mockWeather(page);
   await preparePage(page, { studentName: '', time: '2026-11-16T13:30:00+08:00' });
@@ -86,7 +119,7 @@ test('allows an empty name and uses the afternoon greeting', async ({ page }) =>
 
   await expect(page.locator('#header')).toHaveText('天氣：晴天');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('午安。太陽公公笑哈哈，今天是晴天呀！');
+    .toBe('午安。今日天晴，太陽伯伯出來喇！');
 });
 
 test('uses the evening greeting and says a provided name without a title', async ({ page }) => {
@@ -96,7 +129,7 @@ test('uses the evening greeting and says a provided name without a title', async
   await page.locator('#btn-weather').click();
 
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('晚安，小美。太陽公公笑哈哈，今天是晴天呀！');
+    .toBe('晚安，小美。今日天晴，太陽伯伯出來喇！');
 });
 
 test('uses the selected weather voice for the named report', async ({ page }) => {
@@ -109,23 +142,23 @@ test('uses the selected weather voice for the named report', async ({ page }) =>
   await expect.poll(() => page.evaluate(() => window.lastVoiceName))
     .toBe('Microsoft WanLung Online');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('早晨，小明。太陽同白雲玩捉迷藏，部分時間有陽光呀！');
+    .toBe('早晨，小明。今日有時出太陽，有時有雲呀！');
 });
 
 for (const { icon, description, line } of [
-  { icon: 60, description: '陰天', line: '雲朵排排坐，今天是陰天呀！' },
-  { icon: 62, description: '雨天', line: '雨點滴答滴，今天有雨呀，記得帶遮！' },
-  { icon: 64, description: '大雨', line: '雨水嘩啦啦，今天有大雨，記得帶遮呀！' },
-  { icon: 65, description: '有雷暴', line: '雷公打鼓咚咚響，今天有雷暴，要留心天氣呀！' },
-  { icon: 70, description: '有驟雨', line: '雨點突然來探班，今天有驟雨呀！' },
-  { icon: 72, description: '有雷暴及驟雨', line: '雷公打鼓又落雨，今天有雷暴及驟雨，要留心天氣呀！' },
-  { icon: 75, description: '有大驟雨', line: '雨點嘩啦啦地來了，今天有大驟雨，記得帶遮呀！' },
-  { icon: 76, description: '有薄霧', line: '薄霧像輕紗飄呀飄，今天有薄霧呀！' },
-  { icon: 77, description: '有霧', line: '霧氣白茫茫，今天有霧呀，出門要留心！' },
-  { icon: 84, description: '有雷暴及大驟雨', line: '雷公打鼓又落大雨，今天有雷暴及大驟雨，要留心天氣呀！' },
-  { icon: 85, description: '有全面驟雨', line: '雨點四處來探班，今天有全面驟雨，記得帶遮呀！' }
+  { icon: 60, description: '陰天', line: '今日陰天，好多雲呀！' },
+  { icon: 62, description: '雨天', line: '今日落雨，記得帶遮呀！' },
+  { icon: 64, description: '大雨', line: '今日落大雨，出門要小心呀！' },
+  { icon: 65, description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+  { icon: 70, description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+  { icon: 72, description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+  { icon: 75, description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+  { icon: 76, description: '有薄霧', line: '今日有薄霧，遠處會睇得唔清楚。' },
+  { icon: 77, description: '有霧', line: '今日有霧，睇路要小心呀！' },
+  { icon: 84, description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' },
+  { icon: 85, description: '有全面驟雨', line: '今日好多地方有驟雨，記得帶遮呀！' }
 ]) {
-  test(`uses an accurate playful report for ${description}`, async ({ page }) => {
+  test(`uses a short, clear report for ${description}`, async ({ page }) => {
     await mockWeather(page, { icon });
     await preparePage(page);
 

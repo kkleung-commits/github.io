@@ -343,35 +343,35 @@
         let isReporting = false;
 
         const weatherReports = {
-            50: { description: '晴天', line: '太陽公公笑哈哈，今天是晴天呀！' },
-            51: { description: '部分時間有陽光', line: '太陽同白雲玩捉迷藏，部分時間有陽光呀！' },
-            52: { description: '部分時間有陽光', line: '太陽同白雲玩捉迷藏，部分時間有陽光呀！' },
-            53: { description: '部分時間有陽光', line: '太陽同白雲玩捉迷藏，部分時間有陽光呀！' },
-            54: { description: '部分時間有陽光', line: '太陽同白雲玩捉迷藏，部分時間有陽光呀！' },
-            60: { description: '陰天', line: '雲朵排排坐，今天是陰天呀！' },
-            61: { description: '陰天', line: '雲朵排排坐，今天是陰天呀！' },
-            62: { description: '雨天', line: '雨點滴答滴，今天有雨呀，記得帶遮！' },
-            63: { description: '雨天', line: '雨點滴答滴，今天有雨呀，記得帶遮！' },
-            64: { description: '大雨', line: '雨水嘩啦啦，今天有大雨，記得帶遮呀！' },
-            65: { description: '有雷暴', line: '雷公打鼓咚咚響，今天有雷暴，要留心天氣呀！' },
-            70: { description: '有驟雨', line: '雨點突然來探班，今天有驟雨呀！' },
-            71: { description: '有驟雨', line: '雨點突然來探班，今天有驟雨呀！' },
-            72: { description: '有雷暴及驟雨', line: '雷公打鼓又落雨，今天有雷暴及驟雨，要留心天氣呀！' },
-            73: { description: '有雷暴及驟雨', line: '雷公打鼓又落雨，今天有雷暴及驟雨，要留心天氣呀！' },
-            74: { description: '有雷暴及驟雨', line: '雷公打鼓又落雨，今天有雷暴及驟雨，要留心天氣呀！' },
-            75: { description: '有大驟雨', line: '雨點嘩啦啦地來了，今天有大驟雨，記得帶遮呀！' },
-            76: { description: '有薄霧', line: '薄霧像輕紗飄呀飄，今天有薄霧呀！' },
-            77: { description: '有霧', line: '霧氣白茫茫，今天有霧呀，出門要留心！' },
-            80: { description: '有驟雨', line: '雨點突然來探班，今天有驟雨呀！' },
-            81: { description: '有大驟雨', line: '雨點嘩啦啦地來了，今天有大驟雨，記得帶遮呀！' },
-            82: { description: '有雷暴', line: '雷公打鼓咚咚響，今天有雷暴，要留心天氣呀！' },
-            83: { description: '有雷暴及驟雨', line: '雷公打鼓又落雨，今天有雷暴及驟雨，要留心天氣呀！' },
-            84: { description: '有雷暴及大驟雨', line: '雷公打鼓又落大雨，今天有雷暴及大驟雨，要留心天氣呀！' },
-            85: { description: '有全面驟雨', line: '雨點四處來探班，今天有全面驟雨，記得帶遮呀！' },
-            90: { description: '有驟雨', line: '雨點突然來探班，今天有驟雨呀！' },
-            91: { description: '有大驟雨', line: '雨點嘩啦啦地來了，今天有大驟雨，記得帶遮呀！' },
-            92: { description: '有雷暴', line: '雷公打鼓咚咚響，今天有雷暴，要留心天氣呀！' },
-            93: { description: '有雷暴及大驟雨', line: '雷公打鼓又落大雨，今天有雷暴及大驟雨，要留心天氣呀！' }
+            50: { description: '晴天', line: '今日天晴，太陽伯伯出來喇！' },
+            51: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            52: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            53: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            54: { description: '部分時間有陽光', line: '今日有時出太陽，有時有雲呀！' },
+            60: { description: '陰天', line: '今日陰天，好多雲呀！' },
+            61: { description: '陰天', line: '今日陰天，好多雲呀！' },
+            62: { description: '雨天', line: '今日落雨，記得帶遮呀！' },
+            63: { description: '雨天', line: '今日落雨，記得帶遮呀！' },
+            64: { description: '大雨', line: '今日落大雨，出門要小心呀！' },
+            65: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            70: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            71: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            72: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            73: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            74: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            75: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            76: { description: '有薄霧', line: '今日有薄霧，遠處會睇得唔清楚。' },
+            77: { description: '有霧', line: '今日有霧，睇路要小心呀！' },
+            80: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            81: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            82: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            83: { description: '有雷暴及驟雨', line: '今日有雷暴同驟雨，出門要小心呀！' },
+            84: { description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' },
+            85: { description: '有全面驟雨', line: '今日好多地方有驟雨，記得帶遮呀！' },
+            90: { description: '有驟雨', line: '今日有驟雨，記得帶遮呀！' },
+            91: { description: '有大驟雨', line: '今日有大驟雨，出門要小心呀！' },
+            92: { description: '有雷暴', line: '今日有雷暴，聽到雷聲要留喺室內！' },
+            93: { description: '有雷暴及大驟雨', line: '今日有雷暴同大驟雨，出門要小心呀！' }
         };
 
         function getCantoneseVoices() {
@@ -542,13 +542,13 @@
                 const data = await response.json();
                 const iconIndex = Number(data.icon?.[0]);
                 const report = weatherReports[iconIndex];
-                const observedAt = data.updateTime || data.iconUpdateTime;
+                const observedAt = data.iconUpdateTime || data.updateTime;
                 if (!report || !observedAt) {
                     throw new Error('香港天文台天氣資料不完整或圖示未能辨認');
                 }
 
                 const update = formatHongKongDateTime(observedAt);
-                updateTime.textContent = `香港天文台資料更新時間：${update.label}`;
+                updateTime.textContent = `天氣圖示更新時間：${update.label}`;
                 header.classList.remove('loading');
 
                 if (!update.isToday) {
