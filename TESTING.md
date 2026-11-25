@@ -93,7 +93,7 @@ npm test
 |---|---|---|---|
 | 1.x | `weather-report/` | 9 項通過 | [V1 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-tests.yml) |
 | 2.0.2 | `weather-report-v2/` | 22 項通過 | 與 V3 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
-| 3.0.4 | `weather-report-v3/` | 28 項通過 | 與 V2 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
+| 3.0.5 | `weather-report-v3/` | 28 項通過 | 與 V2 共用[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml) |
 
 2026-11-25 本機驗證結果：V3 的 28 項姓名播報、小朋友聲偏好及天氣報告測試全數通過。每次推送 V2 或 V3 變更時，都會觸發[V2／V3 測試工作流程](https://github.com/kkleung-commits/github.io/actions/workflows/weather-report-v2-tests.yml)。
 

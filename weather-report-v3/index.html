@@ -647,7 +647,7 @@
                 btnWeather.classList.add('show-icon');
                 const greeting = getHongKongGreeting();
                 const introduction = studentName
-                    ? `各位${greeting}，我係今天天氣小主播${studentName}，之後就講天氣報告。`
+                    ? `各位${greeting}，我係今天天氣小主播${studentName}。`
                     : `${greeting}。`;
                 speak(`${introduction}${report.line}`);
             } catch (error) {

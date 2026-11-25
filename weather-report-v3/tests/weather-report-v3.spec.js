@@ -68,7 +68,7 @@ test('reports clear weather with the student name and displays today date and ti
   await expect(page.locator('#update-time')).toContainText('2026年11月16日（今天）');
   await expect(page.locator('#update-time')).toContainText('8時20分');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位早晨，我係今天天氣小主播小明，之後就講天氣報告。今日天晴，太陽伯伯出來喇！');
+    .toBe('各位早晨，我係今天天氣小主播小明。今日天晴，太陽伯伯出來喇！');
   await expect(page.locator('#update-time')).not.toContainText('我是');
 });
 
@@ -132,7 +132,7 @@ test('uses the teacher-selected local weather without requesting HKO data', asyn
   await expect(page.locator('#header')).toHaveText('天氣：陰天（老師選擇）');
   await expect(page.locator('#update-time')).toHaveText('老師已手動選擇天氣，不使用天文台資料。');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位早晨，我係今天天氣小主播小明，之後就講天氣報告。今日係陰天，有雲遮住咗太陽，冇陽光。');
+    .toBe('各位早晨，我係今天天氣小主播小明。今日係陰天，有雲遮住咗太陽，冇陽光。');
   expect(weatherRequests).toBe(0);
 });
 
@@ -164,7 +164,7 @@ test('uses the named afternoon weather anchor', async ({ page }) => {
   await page.locator('#btn-weather').click();
 
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位午安，我係今天天氣小主播小美，之後就講天氣報告。今日天晴，太陽伯伯出來喇！');
+    .toBe('各位午安，我係今天天氣小主播小美。今日天晴，太陽伯伯出來喇！');
 });
 
 test('uses the evening greeting and says a provided name without a title', async ({ page }) => {
@@ -174,7 +174,7 @@ test('uses the evening greeting and says a provided name without a title', async
   await page.locator('#btn-weather').click();
 
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位晚安，我係今天天氣小主播小美，之後就講天氣報告。今日天晴，太陽伯伯出來喇！');
+    .toBe('各位晚安，我係今天天氣小主播小美。今日天晴，太陽伯伯出來喇！');
 });
 
 test('uses the selected weather voice for the named report', async ({ page }) => {
@@ -187,7 +187,7 @@ test('uses the selected weather voice for the named report', async ({ page }) =>
   await expect.poll(() => page.evaluate(() => window.lastVoiceName))
     .toBe('Microsoft WanLung Online');
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位早晨，我係今天天氣小主播小明，之後就講天氣報告。今日有時出太陽，有時有雲呀！');
+    .toBe('各位早晨，我係今天天氣小主播小明。今日有時出太陽，有時有雲呀！');
 });
 
 test('uses the higher-pitched child voice setting for a named report', async ({ page }) => {
@@ -200,7 +200,7 @@ test('uses the higher-pitched child voice setting for a named report', async ({ 
   await expect.poll(() => page.evaluate(() => window.lastSpeechPitch)).toBe(1.35);
   await expect.poll(() => page.evaluate(() => window.lastSpeechRate)).toBe(0.95);
   await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-    .toBe('各位早晨，我係今天天氣小主播小明，之後就講天氣報告。今日天晴，太陽伯伯出來喇！');
+    .toBe('各位早晨，我係今天天氣小主播小明。今日天晴，太陽伯伯出來喇！');
 });
 
 for (const { icon, description, line } of [
@@ -225,7 +225,7 @@ for (const { icon, description, line } of [
 
     await expect(page.locator('#header')).toHaveText(`天氣：${description}`);
     await expect.poll(() => page.evaluate(() => window.lastSpokenText))
-      .toBe(`各位早晨，我係今天天氣小主播小明，之後就講天氣報告。${line}`);
+      .toBe(`各位早晨，我係今天天氣小主播小明。${line}`);
   });
 }
 
