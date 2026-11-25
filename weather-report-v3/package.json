@@ -1,6 +1,6 @@
 {
   "name": "weather-report-eye-gaze-v3",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "private": true,
   "type": "module",
   "scripts": {

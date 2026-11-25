@@ -332,6 +332,7 @@
                 <div class="setting-inputs">
                     <select id="voice-selector">
                         <option value="default">裝置預設</option>
+                        <option value="child">小朋友聲（較童聲）</option>
                         <option value="female">女聲</option>
                         <option value="male">男聲</option>
                     </select>
@@ -463,12 +464,17 @@
         function getSelectedVoice() {
             const voices = getCantoneseVoices();
             const preference = voiceSelector.value;
-            const preferredVoice = preference === 'default'
-                ? null
-                : voices.find(voice => getVoiceGender(voice) === preference);
+            const preferredVoice = preference === 'child'
+                ? voices.find(voice => /child|kid|junior|兒童|小朋友/i.test(`${voice.name} ${voice.voiceURI}`))
+                : preference === 'default'
+                    ? null
+                    : voices.find(voice => getVoiceGender(voice) === preference);
             const voice = preferredVoice || voices.find(item => item.default) || voices[0] || null;
 
-            if (preference !== 'default' && !preferredVoice) {
+            if (preference === 'child' && !preferredVoice) {
+                const fallback = voice ? `改用「${voice.name}」，並提高音調` : '使用瀏覽器預設語音並提高音調';
+                voiceStatus.textContent = `未找到可辨認的小朋友聲粵語語音，${fallback}模擬較童聲的感覺。`;
+            } else if (preference !== 'default' && !preferredVoice) {
                 const gender = preference === 'female' ? '女' : '男';
                 const fallback = voice ? `改用「${voice.name}」` : '改用瀏覽器預設語音';
                 voiceStatus.textContent = `未找到可辨認的${gender}聲粵語語音，${fallback}。`;
@@ -491,8 +497,8 @@
             const voice = getSelectedVoice();
             if (voice) utterance.voice = voice;
             utterance.lang = voice?.lang || 'zh-HK';
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
+            utterance.rate = voiceSelector.value === 'child' ? 0.95 : 0.9;
+            utterance.pitch = voiceSelector.value === 'child' ? 1.35 : 1.1;
             utterance.onend = finishReport;
             utterance.onerror = finishReport;
             window.speechSynthesis.speak(utterance);
@@ -640,7 +646,9 @@
                 weatherIcon.alt = report.description;
                 btnWeather.classList.add('show-icon');
                 const greeting = getHongKongGreeting();
-                const introduction = studentName ? `${greeting}，${studentName}。` : `${greeting}。`;
+                const introduction = studentName
+                    ? `各位${greeting}，我係今天天氣小主播${studentName}，之後就講天氣報告。`
+                    : `${greeting}。`;
                 speak(`${introduction}${report.line}`);
             } catch (error) {
                 header.classList.remove('loading');
